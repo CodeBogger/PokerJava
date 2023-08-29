@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Scanner;
 
 public class PlayerUser extends Player {
-    private static String playerName;
-    private static int chipCount;
+    private String playerName;
+    private int chipCount;
     public PlayerUser(int chipCount, String playerName) {
         super(chipCount, playerName);
-        PlayerUser.playerName = playerName;
-        PlayerUser.chipCount = chipCount;
+        PlayerUser.this.playerName = playerName;
+        PlayerUser.this.chipCount = chipCount;
     }
     public static TurnLogic.CHOICE preFlopTurn(Scanner scan, Player player) {
         TurnLogic.CHOICE choice = null;
@@ -25,24 +25,24 @@ public class PlayerUser extends Player {
                 case "RAISE" -> TurnLogic.CHOICE.RAISE;
                 default -> {
                     System.out.println("Invalid choice. Please enter a valid option.");
-                    yield playerTurn(scan);
+                    yield preFlopTurn(scan, player);
                 }
             };
-            return choice;
+
+        } else {
+            System.out.print("Enter your choice ('CALL', 'FOLD', 'RAISE'): ");
+            String userInput = scan.nextLine().trim();
+
+            choice = switch (userInput) {
+                case "CALL" -> TurnLogic.CHOICE.CALL;
+                case "FOLD" -> TurnLogic.CHOICE.FOLD;
+                case "RAISE" -> TurnLogic.CHOICE.RAISE;
+                default -> {
+                    System.out.println("Invalid choice. Please enter a valid option.");
+                    yield preFlopTurn(scan, player);
+                }
+            };
         }
-        System.out.print("Enter your choice ('CALL', 'FOLD', 'RAISE'): ");
-        String userInput = scan.nextLine().trim();
-
-        choice = switch (userInput) {
-            case "CALL" -> TurnLogic.CHOICE.CALL;
-            case "FOLD" -> TurnLogic.CHOICE.FOLD;
-            case "RAISE" -> TurnLogic.CHOICE.RAISE;
-            default -> {
-                System.out.println("Invalid choice. Please enter a valid option.");
-                yield playerTurn(scan);
-            }
-        };
-
         return choice;
     }
     public static TurnLogic.CHOICE playerTurn(Scanner scan) {
@@ -65,7 +65,7 @@ public class PlayerUser extends Player {
 
         return choice;
     }
-    public static TurnLogic.CHOICE callFoldRaise(int amountToCall, Scanner scan) {
+    public static TurnLogic.CHOICE callFoldRaise(int amountToCall, Scanner scan, Player player) {
         TurnLogic.CHOICE choice = null;
 
         System.out.print("Enter your choice ('CALL', 'FOLD', 'RAISE'): ");
@@ -77,11 +77,11 @@ public class PlayerUser extends Player {
             case "RAISE" -> choice = TurnLogic.CHOICE.RAISE;
             default -> {
                 System.out.println("Invalid choice. Please enter a valid option.");
-                callFoldRaise(amountToCall, scan);
+                choice = callFoldRaise(amountToCall, scan, player);
             }
         }
 
-        System.out.println("\n\n" + playerName + " DECIDED TO " + choice);
+        System.out.println("\n\n" + player.getName() + " DECIDED TO " + choice);
         return choice;
     }
     public static int raiseTo(Scanner scan) {

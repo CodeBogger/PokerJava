@@ -2,6 +2,7 @@ package com.example.javapoker;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 
+import javax.net.ssl.SSLContext;
 import java.util.*;
 import static com.example.javapoker.Player.BlindType;
 import java.util.Scanner;
@@ -12,57 +13,88 @@ public class PokerLogic {
     public static List<Player> currentPlayers = new ArrayList<>();
     static Player littleBlind;
     static Player bigBlind;
+    public static Player winner = null;
     public static void gameStart() {
          addPlayers();
          setBlinds();
          Scanner scan = new Scanner(System.in);
+         int count = 1;
 
-        while(!Menu.buttonClicked) {
+        while(!Menu.buttonClicked || winner != null) {
             Stack<Cards> deck = Deck.initializeDeck();
             preFlopAndFlopHandling(deck, scan);
-            turnRiverHandling(deck, scan);
+            turnRiverHandling(deck, scan, currentPlayers);
 
             try {
-                Thread.sleep(5000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
+            setWinner();
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             reset();
+            count++;
         }
     }
-    private static void giveHands(Stack<Cards> deck) {
-       for(Player player : players) {
-           player.addHand(deck.pop());
-           player.addHand(deck.pop());
-       }
+
+    private static void setWinner() {
+        winner = WinLogic.winStart(currentPlayers, cardsList);
+        System.out.println("\n\n "+winner.getName()+" IS THE WINNER! \n");
+
+        System.out.println("---- The River ----");
+        for(Cards card : cardsList) System.out.println(card.rank()+" of "+card.suit());
+        System.out.println("---- The River ----");
+
+        System.out.println("\n---- Player's Hand ----");
+        for(Cards card : winner.hand) System.out.println(card.rank()+" of "+card.suit());
+        System.out.println("---- Player's Hand ----");
     }
-    private static void turnRiverHandling(Stack<Cards> deck, Scanner scan) {
+    private static void giveHands(Stack<Cards> deck, List<Player> currentPlayers) {
+        int numPlayers = currentPlayers.size(), startIndex = currentPlayers.indexOf(littleBlind);
+
+        for(int i=0; i<numPlayers; i++) {
+            int index = (startIndex + i) % numPlayers;
+            currentPlayers.get(index).addHand(deck.pop());
+            currentPlayers.get(index).addHand(deck.pop());
+        }
+    }
+    private static void turnRiverHandling(Stack<Cards> deck, Scanner scan, List<Player> gamePlayers) {
+        TurnLogic.turns(gamePlayers, scan);
         theTurn(deck, scan);
+
+        TurnLogic.turns(gamePlayers, scan);
         theRiver(deck, scan);
     }
     private static void reset() {
         cardsList.clear();
-        for(Player c : players) {
-            c.reset();
-        }
-        currentPlayers = new ArrayList<>(players);
+        for(Player c : players) c.reset();
+
+        currentPlayers = players;
         changeBlinds();
+        winner = null;
     }
     public static void preFlopAndFlopHandling(Stack<Cards> deck, Scanner scan) {
-        gamePlayers(currentPlayers);
-        giveHands(deck);
+        gamePlayers();
+        giveHands(deck, currentPlayers);
         checkBlinds();
-        TurnLogic.preFlopChoices(players, scan, players.indexOf(bigBlind));
-        flop(deck);
 
-        System.out.println("\n\n");
-        System.out.println("YOUR HAND: ");
-        players.get(0).hand();
+        for(Player player : currentPlayers) {
+            System.out.println("\n"+player.getName()+"'s HAND: ");
+            player.hand();
+        }
+        TurnLogic.preFlopChoices(currentPlayers, scan, currentPlayers.indexOf(littleBlind));
+        flop(deck);
 
         TurnLogic.turns(currentPlayers, scan);
     }
-    public static void gamePlayers(List<Player> list) { list.addAll(players); }
+    public static void gamePlayers() {
+        currentPlayers = new ArrayList<>(players);
+    }
     public static void changeBlinds() {
         int littleBlindIndex = players.indexOf(littleBlind);
         int bigBlindIndex = players.indexOf(bigBlind);
@@ -80,10 +112,10 @@ public class PokerLogic {
         players.get(nextBigBlindIndex).setBlindType(BlindType.BIGBLIND);
     }
     public static void addPlayers() {
-        players.add(new PlayerUser(1000, "USER"));
+        players.add(new PlayerUser(10000, "USER"));
         for (int i = 1; i <= 4; i++) {
             String iString = Integer.toString(i);
-            players.add(new PlayerBot(1000, "BOT" + iString));
+            players.add(new PlayerBot(10000, "BOT" + iString));
         }
     }
     public static void setBlinds() {

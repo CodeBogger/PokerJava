@@ -23,7 +23,7 @@ public class PlayerBot extends Player {
             return choices[rand.nextInt(choices.length)];
         }
 
-        choices = TurnLogic.CHOICE.values();
+        choices = new TurnLogic.CHOICE[] { TurnLogic.CHOICE.CALL, TurnLogic.CHOICE.RAISE, TurnLogic.CHOICE.FOLD };
         return choices[rand.nextInt(choices.length)];
     }
     public static TurnLogic.CHOICE callFoldRaise(int raise) {

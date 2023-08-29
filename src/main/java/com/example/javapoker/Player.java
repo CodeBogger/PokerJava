@@ -8,11 +8,12 @@ public class Player {
         SMALLBLIND,
 
     }
-    boolean folded;
     int chips;
+    boolean folded;
     String name;
     BlindType blindType;
     List<Cards> hand;
+    int blindCallAmount = 0;
 
     public Player(int chipCount, String playerName) {
         this.chips = chipCount;
@@ -20,20 +21,19 @@ public class Player {
         this.hand = new ArrayList<>();
 
     }
+    public List<Cards> handList() {
+        return this.hand;
+    }
     public void hand() {
         for(Cards card : hand) System.out.println(card.rank()+" of "+card.suit());
-        System.out.println("\n\n");
+        System.out.println("\nCARD SIZE: "+hand.size()+"\n");
     }
     public void fold() { this.folded = true; }
-    private void getHand() {
-        for(Cards c : hand) {
-            System.out.println(c.rank()+", OF "+c.suit());
-        }
-    }
     public void addHand(Cards card) {
         this.hand.add(card);
     }
     public void blindCheck() {
+        System.out.println("\n\n");
         if(this.blindType != null) {
 
             if(this.blindType == BlindType.BIGBLIND) {

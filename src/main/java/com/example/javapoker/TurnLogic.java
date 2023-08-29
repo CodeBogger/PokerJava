@@ -13,58 +13,49 @@ public class TurnLogic {
 
     }
     public static void preFlopChoices(List<Player> players, Scanner scan, int startIndex) {
-        List<Player> remainingPlayers = new ArrayList<>(players);
-        int numPlayers = remainingPlayers.size();
+        if(players.size() == 1) return;
 
-        List<Player> foldedPlayers = new ArrayList<>();  // Temporary list for folded players
+        for (int i = 0; i < players.size(); i++) {
+            int index = (startIndex + i) % players.size();
 
-        for (int i = 0; i < numPlayers; i++) {
-
-            int index = (startIndex + i) % numPlayers;
-            if (remainingPlayers.isEmpty()) break;
-
-            Player player = remainingPlayers.get(index);
-
-            if (player.folded) continue;
-
+            Player player = players.get(index);
             TurnLogic.CHOICE choice;
 
-            if (player instanceof PlayerUser) {
-                choice = PlayerUser.preFlopTurn(scan, player);
-            } else {
-                choice = PlayerBot.preFlopTurn(player);
-            }
+            choice = player instanceof PlayerUser ? PlayerUser.preFlopTurn(scan, player) : PlayerBot.preFlopTurn(player);
 
             if (choice == TurnLogic.CHOICE.RAISE) {
                 int raise = player instanceof PlayerUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();
                 System.out.println("\n\n" + player.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
-                raiseAround(player, remainingPlayers, raise, scan);
+                raiseAround(player, players, raise, scan);
+                break;
+
             } else if (choice == TurnLogic.CHOICE.FOLD) {
                 System.out.println("\n\n" + player.getName() + " DECIDES TO FOLD");
-                foldedPlayers.add(player);  // Add folded players to temporary list
+                players.remove(player);
                 player.fold();
+
+                System.out.println("PLAYER COUNT: "+players.size());
+
             } else if (choice == TurnLogic.CHOICE.CALL) {
                 int callAmount = player.blindType == Player.BlindType.SMALLBLIND ? 15 : 30;
                 System.out.println(player.getName() + " decides to call. " + callAmount + " chips have been deducted from their amount.");
                 player.chips -= callAmount;
+                player.blindCallAmount -= callAmount;
             }
+            if(players.size() == 1) break;
         }
 
-        players.removeAll(foldedPlayers);
-
+       for(Player player : players) player.blindCallAmount = 0;
     }
 
     public static void turns(List<Player> players, Scanner scan) {
-        List<Player> remainingPlayers = new ArrayList<>(players);
+        if(players.size() == 1) return;
 
-        for (int i = 0; i < remainingPlayers.size(); i++) {
-            Player player = remainingPlayers.get(i);
+        for (int i = 0; i < players.size(); i++) {
+            Player current = players.get(i);
 
-            if (player.folded) {
-                continue;
-            }
 
-            boolean isUser = player instanceof PlayerUser;
+            boolean isUser = current instanceof PlayerUser;
             TurnLogic.CHOICE choice;
 
             if (isUser) {
@@ -76,55 +67,63 @@ public class TurnLogic {
             switch (choice) {
                 case RAISE -> {
                     int raise = isUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();
-                    System.out.println("\n\n" + player.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
-                    raiseAround(player, remainingPlayers, raise, scan);
-
+                    System.out.println("\n\n" + current.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
+                    raiseAround(current, players, raise, scan);
+                    break;
                 }
-                case CHECK -> System.out.println("\n\n" + player.getName() + " DECIDES TO CHECK");
+                case CHECK -> System.out.println("\n\n" + current.getName() + " DECIDES TO CHECK");
                 case FOLD -> {
 
-                    System.out.println("\n\n" + player.getName() + " DECIDES TO FOLD");
-                    remainingPlayers.remove(player);
+                    System.out.println("\n\n" + current.getName() + " DECIDES TO FOLD");
+                    players.remove(current);
                     i--;
 
                     System.out.println("Remaining players:");
-                    for (Player remainingPlayer : remainingPlayers) {
-                        System.out.println(remainingPlayer.getName());
+                    System.out.println("COUNT: "+players.size());
+                    for (Player player : players) {
+                        System.out.println(player.getName());
                     }
                 }
             }
+            if(players.size() == 1) break;
         }
     }
     public static void raiseAround(Player current, List<Player> players, int initialRaise, Scanner scan) {
-        List<Player> playersCopy = new ArrayList<>(players);
-        int currentIndex = playersCopy.indexOf(current);
-        int numPlayers = playersCopy.size();
+        if(players.size() == 1) return;
+        int totalRaise = initialRaise, numPlayers = players.size(), startIndex = players.indexOf(current);
 
-        int totalRaise = initialRaise;
+        System.out.println("\n\nPLAYERS (IN RAISE)");
+        for(Player player : players) {
+            System.out.println(player.getName());
+        }
+        System.out.println("\n");
+        for (int i = 0; i < numPlayers - 1; i++) {
+            int index = (startIndex + 1 + i) % players.size();
+            System.out.println(index+" <- CURRENT INDEX, START INDEX: "+players.indexOf(current));
 
-        List<Player> foldedPlayers = new ArrayList<>();  // Temporary list for folded players
-
-        for (int i = currentIndex + 1; i < currentIndex + numPlayers; i++) {
-            int index = i % numPlayers;
-
-            if(foldedPlayers.size() == numPlayers-1) break;
-            Player currentPlayer = playersCopy.get(index);
+            Player currentPlayer = players.get(index);
 
             if (currentPlayer != current) {
                 TurnLogic.CHOICE playerAction;
 
-                if(currentPlayer.folded) continue;
-
                 if (currentPlayer instanceof PlayerUser) {
-                    playerAction = PlayerUser.callFoldRaise(totalRaise, scan);
+                    playerAction = PlayerUser.callFoldRaise(totalRaise, scan, currentPlayer);
                 } else {
                     playerAction = PlayerBot.callFoldRaise(totalRaise);
                 }
 
                 switch (playerAction) {
-                    case CALL -> currentPlayer.chips -= totalRaise;
+                    case CALL -> {
+                        if(currentPlayer.blindCallAmount != 0) {
+                            currentPlayer.chips -= totalRaise + (30 - current.blindCallAmount);
+                            System.out.println(currentPlayer.getName()+" DECIDES TO CALL "+totalRaise);
+                            continue;
+                        }
+                        currentPlayer.chips -= totalRaise;
+                        System.out.println(currentPlayer.getName()+" DECIDES TO CALL "+totalRaise);
+                    }
                     case FOLD -> {
-                        foldedPlayers.add(currentPlayer);  // Add folded players to temporary list
+                        players.remove(currentPlayer);
                         currentPlayer.fold();
                     }
                     case RAISE -> {
@@ -135,12 +134,15 @@ public class TurnLogic {
                             newRaise = PlayerBot.raiseTo();
                         }
                         totalRaise += newRaise;
+                        if(currentPlayer.blindCallAmount != 0) {
+                            currentPlayer.chips -= totalRaise + (30 - currentPlayer.blindCallAmount);
+                        }
                         System.out.println(currentPlayer.getName() + " decides to re-raise. New raise amount: " + totalRaise);
                         raiseAround(currentPlayer, players, totalRaise, scan);
                     }
                 }
             }
+            if(players.size() == 1) break;
         }
-        players.removeAll(foldedPlayers);
     }
 }
