@@ -94,10 +94,7 @@ public class TurnLogic {
                 }
                 case ALLIN -> {
                     int allInAmount = current.chips;
-                    current.chips = 0;
-
-                    PokerLogic.pot += allInAmount;
-                    System.out.println("\n"+current.getName()+" decides to go all in! Amount to call: "+allInAmount);
+                    current.AllIn();
                     raiseAround(current, players, allInAmount, scan);
                     return;
                 }
@@ -109,29 +106,30 @@ public class TurnLogic {
         if(players.size() == 1) return;
         int totalRaise = initialRaise, numPlayers = players.size(), startIndex = players.indexOf(current);
 
-        System.out.println("\n\nPLAYERS (IN RAISE)");
-        for(Player player : players) { System.out.println(player.getName()); }
-        System.out.println("\n");
-        for (int i = 0; i < numPlayers - 1; i++) {
+        for (int i = 0; i < numPlayers; i++) {
             int index = (startIndex + 1 + i) % players.size();
 
             Player currentPlayer = players.get(index);
             boolean isUser = currentPlayer instanceof PlayerUser;
 
-            if(currentPlayer.isAllIn() || current == currentPlayer) continue;
+            if(currentPlayer.isAllIn() || currentPlayer == current) continue;
             TurnLogic.CHOICE playerAction;
 
             playerAction = isUser ? PlayerUser.callFoldRaise(totalRaise, scan, currentPlayer) : PlayerBot.callFoldRaise(totalRaise, currentPlayer);
-            System.out.println("ACTION");
+
             switch (playerAction) {
                 case CALL -> {
                     int amountToCall = totalRaise + (currentPlayer.inPreFlop ? (30 - currentPlayer.blindCallAmount) : 0);
                     currentPlayer.chips -= amountToCall;
                     PokerLogic.pot += amountToCall;
 
-                    System.out.println(currentPlayer.getName()+" DECIDES TO CALL "+totalRaise);
+                    System.out.println(currentPlayer.getName()+" decides to call "+totalRaise);
                 }
-                case ALLIN -> { currentPlayer.AllIn(); }
+                case ALLIN -> {
+                    int allInAmount = currentPlayer.chips;
+                    currentPlayer.AllIn();
+                    raiseAround(currentPlayer, players, allInAmount, scan);
+                }
                 case FOLD -> {
                     System.out.println(currentPlayer.getName()+" decided to fold!");
                     players.remove(currentPlayer);
