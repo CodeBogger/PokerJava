@@ -29,14 +29,14 @@ public class Player {
     public void AllIn() {
         System.out.println(this.getName()+" went all in!");
         this.allIn = true;
-        this.chips = 0;
+        PokerLogic.pot += this.chips;
+        chips = 0;
     }
     public void fold() { this.folded = true; }
     public void addHand(Cards card) {
         this.hand.add(card);
     }
     public void blindCheck() {
-        System.out.println("\n\n");
         if(this.blindType != null) {
 
             if(this.blindType == BlindType.BIGBLIND) {
@@ -53,6 +53,8 @@ public class Player {
     public void reset() {
         this.hand.clear();
         this.folded = false;
+        this.allIn = false;
+        this.chips = 10000;
     }
     public void setBlindType(BlindType type) { this.blindType = type; }
     public void setBlindNull() { this.blindType = null; }

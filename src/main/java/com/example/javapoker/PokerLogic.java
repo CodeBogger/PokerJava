@@ -40,9 +40,9 @@ public class PokerLogic {
     }
 
     private static void getUserHand() {
-        System.out.println("\n");
+        System.out.println("\n----------------Your hand----------------");
         user.hand();
-        System.out.println("\n");
+        System.out.println("----------------Your hand----------------\n");
     }
     private static void setWinner() {
         winner = WinLogic.winStart(currentPlayers, cardsList);
@@ -55,7 +55,7 @@ public class PokerLogic {
 
         System.out.println("\n---- Player's Hand ----");
         for(Cards card : winner.hand) System.out.println(card.rank()+" of "+card.suit());
-        System.out.println("---- Player's Hand ----");
+        System.out.println("---- Player's Hand ----\n\n");
     }
     private static void giveHands(Stack<Cards> deck, List<Player> currentPlayers) {
         int numPlayers = currentPlayers.size(), startIndex = currentPlayers.indexOf(littleBlind);
