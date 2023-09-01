@@ -57,7 +57,7 @@ public class TurnLogic {
             if(players.size() == 1) break;
         }
 
-       for(Player player : players) { player.blindCallAmount = 0; player.inPreFlop = false; }
+        for(Player player : players) { player.blindCallAmount = 0; player.inPreFlop = false; }
     }
 
     public static void turns(List<Player> players, Scanner scan) {
@@ -123,38 +123,32 @@ public class TurnLogic {
 
             playerAction = isUser ? PlayerUser.callFoldRaise(totalRaise, scan, currentPlayer) : PlayerBot.callFoldRaise(totalRaise, currentPlayer);
             System.out.println("ACTION");
-                switch (playerAction) {
-                    case CALL -> {
-                            int amountToCall = totalRaise + (currentPlayer.inPreFlop ? (30 - currentPlayer.blindCallAmount) : 0);
-                            currentPlayer.chips -= amountToCall;
-                            PokerLogic.pot += amountToCall;
+            switch (playerAction) {
+                case CALL -> {
+                    int amountToCall = totalRaise + (currentPlayer.inPreFlop ? (30 - currentPlayer.blindCallAmount) : 0);
+                    currentPlayer.chips -= amountToCall;
+                    PokerLogic.pot += amountToCall;
 
-                            System.out.println(currentPlayer.getName()+" DECIDES TO CALL "+totalRaise);
-                    }
-                    case ALLIN -> {
-                        int allInAmount = currentPlayer.chips;
-                        currentPlayer.AllIn();
-
-                        raiseAround(currentPlayer, players, allInAmount+totalRaise, scan);
-                        return;
-                    }
-                    case FOLD -> {
-                        System.out.println(currentPlayer.getName()+" decided to fold!");
-                        players.remove(currentPlayer);
-                        currentPlayer.fold();
-                    }
-                    case RAISE -> {
-                        int newRaise = isUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();
-                        totalRaise += newRaise;
-
-                        if(currentPlayer.blindCallAmount != 0) {
-                            currentPlayer.chips -= totalRaise + (30 - currentPlayer.blindCallAmount);
-                        }
-                        System.out.println(currentPlayer.getName() + " decides to re-raise. New raise amount: " + totalRaise);
-                        raiseAround(currentPlayer, players, totalRaise, scan);
-                        return;
-                    }
+                    System.out.println(currentPlayer.getName()+" DECIDES TO CALL "+totalRaise);
                 }
+                case ALLIN -> { currentPlayer.AllIn(); }
+                case FOLD -> {
+                    System.out.println(currentPlayer.getName()+" decided to fold!");
+                    players.remove(currentPlayer);
+                    currentPlayer.fold();
+                }
+                case RAISE -> {
+                    int newRaise = isUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();
+                    totalRaise += newRaise;
+
+                    if(currentPlayer.blindCallAmount != 0) {
+                        currentPlayer.chips -= totalRaise + (30 - currentPlayer.blindCallAmount);
+                    }
+                    System.out.println(currentPlayer.getName() + " decides to re-raise. New raise amount: " + totalRaise);
+                    raiseAround(currentPlayer, players, totalRaise, scan);
+                    return;
+                }
+            }
             if(players.size() == 1) break;
         }
     }

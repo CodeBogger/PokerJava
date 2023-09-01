@@ -14,9 +14,9 @@ public class PokerLogic {
     public static Player winner = null;
     public static Player user = null;
     public static void gameStart() {
-         addPlayers();
-         setBlinds();
-         Scanner scan = new Scanner(System.in);
+        addPlayers();
+        setBlinds();
+        Scanner scan = new Scanner(System.in);
 
         while(!Menu.buttonClicked || winner != null) {
             Stack<Cards> deck = Deck.initializeDeck();
@@ -163,4 +163,3 @@ public class PokerLogic {
         TurnLogic.turns(currentPlayers, scan);
     }
 }
-
