@@ -53,6 +53,7 @@ public class Player {
     public void reset() {
         this.hand.clear();
         this.folded = false;
+        this.chips = 1000;
     }
     public void setBlindType(BlindType type) { this.blindType = type; }
     public void setBlindNull() { this.blindType = null; }
