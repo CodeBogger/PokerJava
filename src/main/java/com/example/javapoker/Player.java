@@ -3,17 +3,17 @@ package com.example.javapoker;
 import java.util.ArrayList;
 import java.util.List;
 public class Player {
-    public static enum BlindType {
+    public enum BlindType {
         BIGBLIND,
         SMALLBLIND,
 
     }
-    int chips;
+    boolean allIn = false, inPreFlop = true;
+    int chips, blindCallAmount = 0;
     boolean folded;
     String name;
     BlindType blindType;
     List<Cards> hand;
-    int blindCallAmount = 0;
 
     public Player(int chipCount, String playerName) {
         this.chips = chipCount;
@@ -21,12 +21,15 @@ public class Player {
         this.hand = new ArrayList<>();
 
     }
-    public List<Cards> handList() {
-        return this.hand;
-    }
+    public boolean isAllIn() { return this.allIn; }
     public void hand() {
         for(Cards card : hand) System.out.println(card.rank()+" of "+card.suit());
         System.out.println("\nCARD SIZE: "+hand.size()+"\n");
+    }
+    public void AllIn() {
+        System.out.println(this.getName()+" went all in!");
+        this.allIn = true;
+        this.chips = 0;
     }
     public void fold() { this.folded = true; }
     public void addHand(Cards card) {
@@ -56,3 +59,4 @@ public class Player {
     public BlindType getBlindType() { return this.blindType; }
     public String getName() { return this.name; }
 }
+
