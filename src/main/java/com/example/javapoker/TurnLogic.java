@@ -32,23 +32,18 @@ public class TurnLogic {
             } else if (choice == CHOICE.FOLD) {
                 System.out.println("\n\n" + player.getName() + " DECIDES TO FOLD");
                 players.remove(player);
-                player.fold();
+                player.fold(player);
 
                 System.out.println("PLAYER COUNT: "+players.size());
 
             } else if (choice == CHOICE.CALL) {
+                player.call(0);
                 int callAmount = player.blindType == Player.BlindType.SMALLBLIND ? 15 : 30;
-                PokerLogic.pot += callAmount;
 
                 System.out.println(player.getName() + " decides to call. " + callAmount + " chips have been deducted from their amount.");
-                player.chips -= callAmount;
-                player.blindCallAmount -= callAmount;
-
             } else if (choice == CHOICE.ALLIN) {
+                player.AllIn();
                 int allInCall = player.chips;
-                PokerLogic.pot += allInCall;
-
-                player.chips = 0;
 
                 System.out.println("\n"+player.getName()+" decides to go all in! Amount to call: "+allInCall);
                 raiseAround(player, players, allInCall, scan);
@@ -113,16 +108,11 @@ public class TurnLogic {
             boolean isUser = currentPlayer instanceof PlayerUser;
 
             if(currentPlayer.isAllIn() || currentPlayer == current) continue;
-            TurnLogic.CHOICE playerAction;
-
-            playerAction = isUser ? PlayerUser.callFoldRaise(totalRaise, scan, currentPlayer) : PlayerBot.callFoldRaise(totalRaise, currentPlayer);
+            TurnLogic.CHOICE playerAction = isUser ? PlayerUser.callFoldRaise(totalRaise, scan, currentPlayer) : PlayerBot.callFoldRaise(totalRaise, currentPlayer);
 
             switch (playerAction) {
                 case CALL -> {
-                    int amountToCall = totalRaise + (currentPlayer.inPreFlop ? (30 - currentPlayer.blindCallAmount) : 0);
-                    currentPlayer.chips -= amountToCall;
-                    PokerLogic.pot += amountToCall;
-
+                    currentPlayer.call(totalRaise);
                     System.out.println(currentPlayer.getName()+" decides to call "+totalRaise);
                 }
                 case ALLIN -> {
@@ -131,9 +121,8 @@ public class TurnLogic {
                     raiseAround(currentPlayer, players, allInAmount, scan);
                 }
                 case FOLD -> {
-                    System.out.println(currentPlayer.getName()+" decided to fold!");
                     players.remove(currentPlayer);
-                    currentPlayer.fold();
+                    currentPlayer.fold(currentPlayer);
                 }
                 case RAISE -> {
                     int newRaise = isUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();

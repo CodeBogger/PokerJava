@@ -6,14 +6,14 @@ import static com.example.javapoker.Player.BlindType;
 
 public class PokerLogic {
     static List<Cards> cardsList = new ArrayList<>();
-    public static List<Player> players = new ArrayList<>();
-    public static List<Player> currentPlayers = new ArrayList<>();
+    static List<Player> players = new ArrayList<>();
+    static List<Player> currentPlayers = new ArrayList<>();
     static Player littleBlind;
     static Player bigBlind;
     static int pot, sidePot;
-    public static Player winner = null;
-    public static Player user = null;
-    public static void gameStart() {
+    static Player winner = null;
+    static Player user = null;
+    static void gameStart() {
         addPlayers();
         setBlinds();
         Scanner scan = new Scanner(System.in);
@@ -23,22 +23,21 @@ public class PokerLogic {
             preFlopAndFlopHandling(deck, scan);
             turnRiverHandling(deck, scan, currentPlayers);
 
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
+            sleep();
             setWinner();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
+            sleep();
             reset();
         }
     }
 
+    private static void sleep() {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
     private static void getUserHand() {
         System.out.println("\n----------------Your hand----------------");
         user.hand();
@@ -78,11 +77,11 @@ public class PokerLogic {
     private static void reset() {
         cardsList.clear();
         for(Player c : players) c.reset();
-
         currentPlayers = players;
         changeBlinds();
         winner = null;
         pot = 0;
+        sidePot = 0;
     }
     public static void preFlopAndFlopHandling(Stack<Cards> deck, Scanner scan) {
         gamePlayers();

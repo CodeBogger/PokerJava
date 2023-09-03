@@ -32,7 +32,12 @@ public class Player {
         PokerLogic.pot += this.chips;
         chips = 0;
     }
-    public void fold() { this.folded = true; }
+    public void call(int initial) {
+        int amountToCall = initial + (this.inPreFlop ? (30 - this.blindCallAmount) : 0);
+        this.chips -= amountToCall;
+        PokerLogic.pot += amountToCall;
+    }
+    public void fold(Player player) { this.folded = true; System.out.println(player.getName()+" decided to fold!"); }
     public void addHand(Cards card) {
         this.hand.add(card);
     }
