@@ -167,7 +167,9 @@ public class WinLogic {
             }
         }
     }
+
     private static void highestStraight(List<Player> remainingPlayers, List<Cards> cards) {
+        int highestAscendCard = -1;
         for (Player player : remainingPlayers) {
             String highestRank = "";
             int consecutiveCount = 0;
@@ -184,13 +186,25 @@ public class WinLogic {
                 }
             }
 
-            if (!highestRank.isEmpty()) {
-                winner = player;
-                return;
+            int getIndex = Arrays.asList(ranks).indexOf(highestRank);
+            if(!highestRank.isEmpty()) {
+                if(getIndex > highestAscendCard) {
+                    highestAscendCard = getIndex;
+                    winner = player;
+                }
             }
         }
     }
-
+    //Start from here
+    //Start from here
+    //Start from here
+    //Start from here
+    //Start from here
+    //Start from here
+    //Start from here
+    //Start from here
+    //Start from here
+    //Start from here
     private static void highestThreeOfAKind(List<Player> remainingPlayers, List<Cards> cards) {
         for (Player player : remainingPlayers) {
             String highestRank = "";
