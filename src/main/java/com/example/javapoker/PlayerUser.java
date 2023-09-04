@@ -14,9 +14,9 @@ public class PlayerUser extends Player {
     public static TurnLogic.CHOICE preFlopTurn(Scanner scan, Player player) {
         TurnLogic.CHOICE choice = null;
 
-        if(player.blindType == BlindType.BIGBLIND) {
+        if(player.blindType == BlindType.BIGBLIND || player.blindType == BlindType.SMALLBLIND) {
 
-            checkFoldRaiseAllIn();
+            System.out.println("Enter your choice ('CHECK', 'FOLD', 'RAISE', 'ALLIN'): ");
             String userInput = scan.nextLine().trim();
 
             choice = switch (userInput) {

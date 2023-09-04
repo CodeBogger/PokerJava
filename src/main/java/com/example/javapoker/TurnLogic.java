@@ -17,6 +17,7 @@ public class TurnLogic {
             int index = (startIndex + i) % players.size();
 
             Player player = players.get(index);
+            System.out.println("CURRENT PLAYER: "+player.getName());
             TurnLogic.CHOICE choice;
 
             choice = player instanceof PlayerUser ? PlayerUser.preFlopTurn(scan, player) : PlayerBot.preFlopTurn(player);
@@ -28,10 +29,7 @@ public class TurnLogic {
                 break;
 
             } else if (choice == CHOICE.FOLD) {
-                System.out.println("\n\n" + player.getName() + " DECIDES TO FOLD");
-                players.remove(player);
                 player.fold(player);
-
                 System.out.println("PLAYER COUNT: "+players.size());
 
             } else if (choice == CHOICE.CALL) {

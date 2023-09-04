@@ -10,10 +10,11 @@ public class Player {
     }
     boolean allIn = false, inPreFlop = true;
     int chips, blindCallAmount = 0;
-    boolean folded;
+    boolean folded, calledBB = false, calledLB = false;
     String name;
     BlindType blindType;
     List<Cards> hand;
+
 
     public Player(int chipCount, String playerName) {
         this.chips = chipCount;
@@ -37,7 +38,11 @@ public class Player {
         this.chips -= amountToCall;
         PokerLogic.pot += amountToCall;
     }
-    public void fold(Player player) { this.folded = true; System.out.println(player.getName()+" decided to fold!"); }
+    public void fold(Player player) {
+        this.folded = true;
+        PokerLogic.currentPlayers.remove(player);
+        System.out.println(player.getName()+" decided to fold!");
+    }
     public void addHand(Cards card) {
         this.hand.add(card);
     }
@@ -61,8 +66,16 @@ public class Player {
         this.allIn = false;
         this.chips = 10000;
     }
-    public void setBlindType(BlindType type) { this.blindType = type; }
-    public void setBlindNull() { this.blindType = null; }
-    public BlindType getBlindType() { return this.blindType; }
-    public String getName() { return this.name; }
+    public void setBlindType(BlindType type) {
+        this.blindType = type;
+    }
+    public void setBlindNull() {
+        this.blindType = null;
+    }
+    public BlindType getBlindType() {
+        return this.blindType;
+    }
+    public String getName() {
+        return this.name;
+    }
 }

@@ -89,7 +89,7 @@ public class PokerLogic {
         checkBlinds();
 
         if(!user.folded) getUserHand();
-        TurnLogic.preFlopChoices(currentPlayers, scan, currentPlayers.indexOf(littleBlind));
+        TurnLogic.preFlopChoices(currentPlayers, scan, (currentPlayers.indexOf(littleBlind) + 2) % players.size());
         flop(deck);
 
         if(!user.folded) getUserHand();

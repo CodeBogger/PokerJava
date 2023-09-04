@@ -4,14 +4,33 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class WinLogic {
+    public enum handTypes {
+        highCard,
+        highestPair,
+        highestTwoPair,
+        highestThreeOfAKind,
+        highestStraight,
+        highestFlush,
+        highestFullHouse,
+        highestFourOfAKind,
+        highestStraightFlush,
+        royalFlush,
+    }
     static String[] suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
-    static String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
+    public static String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
     static Player winner = null;
+    static handTypes bestHand = null;
     public static Player winStart(List<Player> remainingPlayers, List<Cards> cards) {
         if (remainingPlayers.size() == 1) return remainingPlayers.get(0);
 
+        getHandValues(remainingPlayers, cards); //get hand values in ascending order to prioritize higher hands with higher value
+        //get highest hand
+        return winner;
+    }
+
+    private static void getHandValues(List<Player> remainingPlayers, List<Cards> cards) {
         highCard(remainingPlayers, cards);
-        pair(remainingPlayers, cards);
+        highestPair(remainingPlayers, cards);
         highestTwoPair(remainingPlayers, cards);
         highestThreeOfAKind(remainingPlayers, cards);
         highestStraight(remainingPlayers, cards);
@@ -20,10 +39,7 @@ public class WinLogic {
         highestFourOfAKind(remainingPlayers, cards);
         highestStraightFlush(remainingPlayers, cards);
         royalFlush(remainingPlayers, cards);
-
-        return winner;
     }
-
 
     private static boolean playerHasCard(Player player, List<Cards> cards, String suit, String rank) {
         return player.hand.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank)) ||
@@ -38,7 +54,7 @@ public class WinLogic {
                         count++;
                         if (count >= 5) {
                             winner = player;
-                            System.out.println(player.getName()+" has a royal flush!");
+                            bestHand = handTypes.royalFlush;
                             return;
                         }
                     } else {
@@ -47,56 +63,76 @@ public class WinLogic {
                 }
             }
         }
+
     }
     private static void highestStraightFlush(List<Player> remainingPlayers, List<Cards> cards) {
+        int highestRankCard = -1;
+
         for (Player player : remainingPlayers) {
+            int tempHighFlushCard = -1;
+
             for (String suit : suits) {
                 for (int i = ranks.length - 1; i >= 4; i--) {
                     boolean hasStraightFlush = true;
+                    int currentRank = -1;
+
                     for (int j = i; j > i - 5; j--) {
+                        currentRank = i; // initialize the highest card from descending order
                         if (!playerHasCard(player, cards, suit, ranks[j])) {
                             hasStraightFlush = false;
                             break;
                         }
                     }
                     if (hasStraightFlush) {
-                        winner = player;
-                        System.out.println(player.getName()+" has the highest straight flush!");
-                        return;
+                        tempHighFlushCard = currentRank; //if the straight flush is successful, assign the current to highest for that user
+                        bestHand = handTypes.royalFlush;
+                        break;
                     }
+
                 }
+            }
+            if(tempHighFlushCard > highestRankCard) {
+                winner = player; //highest card of straight flush rank will get the assignment for the winner
             }
         }
     }
     private static void highestFourOfAKind(List<Player> remainingPlayers, List<Cards> cards) {
+        int highestRank = -1;
         for (Player player : remainingPlayers) {
+            int tempRank = -1;
             for (String rank : ranks) {
                 if (countRank(player, cards, rank) >= 4) {
-                    winner = player;
-                    System.out.println(player.getName()+" has the highest four of a kind!");
-
-                    return;
+                    tempRank = Arrays.asList(ranks).indexOf(rank);
                 }
+            }
+            if(tempRank > highestRank) {
+                winner = player;
+                highestRank = tempRank;
             }
         }
     }
     private static void highestFullHouse(List<Player> remainingPlayers, List<Cards> cards) {
+        int higherThreePair = -1;
         for (Player player : remainingPlayers) {
+            int playerRankThreePair = -1; //if full house is existent, then assign the rank index and whoever maxes out the integer is the person with higher full house
             String highestTripleRank = "";
             String highestPairRank = "";
 
             for (String rank : ranks) {
                 if (countRank(player, cards, rank) >= 3) {
                     highestTripleRank = rank;
+
                 } else if (countRank(player, cards, rank) >= 2) {
                     highestPairRank = rank;
                 }
-            }
 
-            if (!highestTripleRank.isEmpty() && !highestPairRank.isEmpty()) {
+                if (!highestTripleRank.isEmpty() && !highestPairRank.isEmpty()) {
+                    playerRankThreePair = rank.indexOf(highestTripleRank);
+                }
+            }
+            if(playerRankThreePair > higherThreePair) {
                 winner = player;
-                System.out.println(player.getName()+" has the highest full house!");
-                return;
+                higherThreePair = playerRankThreePair; //if full house is non-existent, the statement will not be called since -1 is not > -1
             }
         }
     }
@@ -107,19 +143,27 @@ public class WinLogic {
         return (int) (countInHand + countInCommunity);
     }
     private static void highestFlush(List<Player> remainingPlayers, List<Cards> cards) {
+        int highRank = -1;
+
         for (Player player : remainingPlayers) {
+            int highestRank = -1;
             for (String suit : suits) {
                 int count = 0;
                 for (String rank : ranks) {
+                    int currRank = -1;
                     if (playerHasCard(player, cards, suit, rank)) {
                         count++;
+                        currRank = Math.max(Arrays.asList(ranks).indexOf(rank), currRank);
                         if (count >= 5) {
-                            winner = player;
-                            System.out.println(player.getName()+" has the highest flush!");
-                            return;
+                            highestRank = currRank;
+                            break;
                         }
                     }
                 }
+            }
+            if (highestRank > highRank) {
+                winner = player;
+                highRank = highestRank;
             }
         }
     }
@@ -142,7 +186,6 @@ public class WinLogic {
 
             if (!highestRank.isEmpty()) {
                 winner = player;
-                System.out.println(player.getName()+" has the highest straight!");
                 return;
             }
         }
@@ -172,7 +215,6 @@ public class WinLogic {
 
             if (!highestRank.isEmpty()) {
                 winner = player;
-                System.out.println(player.getName()+" has the highest three of a kind!");
                 return;
             }
         }
@@ -207,11 +249,10 @@ public class WinLogic {
                 highestPairRank1 = pairRank1;
                 highestPairRank2 = pairRank2;
                 winner = player;
-                System.out.println(player.getName()+" has the highest two pair!");
             }
         }
     }
-    private static void pair(List<Player> remainingPlayers, List<Cards> cards) {
+    private static void highestPair(List<Player> remainingPlayers, List<Cards> cards) {
         int highestPairRank = -1;
 
         for (Player player : remainingPlayers) {
@@ -225,13 +266,13 @@ public class WinLogic {
                             if (pairRank > highestPairRank) {
                                 highestPairRank = pairRank;
                                 winner = player;
-                                System.out.println(player.getName()+" has the highest pair!");
                             }
                             break;
                         }
                     }
                 }
             }
+
         }
     }
     private static void highCard(List<Player> remainingPlayers, List<Cards> cards) {
@@ -257,7 +298,6 @@ public class WinLogic {
         winner = highestPlayer;
 
         assert highestPlayer != null;
-        System.out.println(highestPlayer.getName()+" has the highest card!");
     }
 }
 
