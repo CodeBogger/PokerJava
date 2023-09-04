@@ -110,12 +110,9 @@ public class WinLogic {
         for (Player player : remainingPlayers) {
             for (String suit : suits) {
                 int count = 0;
-                String highestRank = "";
-
                 for (String rank : ranks) {
                     if (playerHasCard(player, cards, suit, rank)) {
                         count++;
-                        highestRank = rank;
                         if (count >= 5) {
                             winner = player;
                             System.out.println(player.getName()+" has the highest flush!");

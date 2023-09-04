@@ -10,7 +10,7 @@ public class PokerLogic {
     static List<Player> currentPlayers = new ArrayList<>();
     static Player littleBlind;
     static Player bigBlind;
-    static int pot, sidePot;
+    static int pot;
     static Player winner = null;
     static Player user = null;
     static void gameStart() {
@@ -81,7 +81,7 @@ public class PokerLogic {
         changeBlinds();
         winner = null;
         pot = 0;
-        sidePot = 0;
+        SidePot.sidePot = 0;
     }
     public static void preFlopAndFlopHandling(Stack<Cards> deck, Scanner scan) {
         gamePlayers();

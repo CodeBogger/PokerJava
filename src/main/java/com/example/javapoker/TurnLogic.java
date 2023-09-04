@@ -1,8 +1,6 @@
 package com.example.javapoker;
 
 import java.util.*;
-
-
 public class TurnLogic {
 
     public enum CHOICE {
@@ -121,6 +119,7 @@ public class TurnLogic {
                     raiseAround(currentPlayer, players, allInAmount, scan);
                 }
                 case FOLD -> {
+                    System.out.println(currentPlayer.getName()+" decides to fold!");
                     players.remove(currentPlayer);
                     currentPlayer.fold(currentPlayer);
                 }
