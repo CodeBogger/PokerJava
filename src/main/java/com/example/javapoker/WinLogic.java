@@ -195,17 +195,8 @@ public class WinLogic {
             }
         }
     }
-    //Start from here
-    //Start from here
-    //Start from here
-    //Start from here
-    //Start from here
-    //Start from here
-    //Start from here
-    //Start from here
-    //Start from here
-    //Start from here
     private static void highestThreeOfAKind(List<Player> remainingPlayers, List<Cards> cards) {
+        int highestIndex = -1;
         for (Player player : remainingPlayers) {
             String highestRank = "";
             int highestCount = 0;
@@ -226,11 +217,14 @@ public class WinLogic {
                     }
                 }
             }
-
-            if (!highestRank.isEmpty()) {
-                winner = player;
-                return;
+            int getIndex = Arrays.asList(ranks).indexOf(highestRank);
+            if(!highestRank.isEmpty()) {
+                if(getIndex > highestIndex) {
+                    highestIndex = getIndex;
+                    winner = player;
+                }
             }
+
         }
     }
     private static void highestTwoPair(List<Player> remainingPlayers, List<Cards> cards) {
@@ -310,7 +304,6 @@ public class WinLogic {
             }
         }
         winner = highestPlayer;
-
         assert highestPlayer != null;
     }
 }
