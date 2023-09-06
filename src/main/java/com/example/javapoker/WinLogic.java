@@ -327,7 +327,7 @@ public class WinLogic {
                         handValues.clear();  // clear the map since we have a new highest card
                         handValues.computeIfAbsent(getIndex, k -> new ArrayList<>()).add(player);
                         winner = player;
-                        bestHand = handTypes.highestStraight;
+                        bestHand = handTypes.highestThreeOfAKind;
                         highestIndex = getIndex;
 
                     } else if(getIndex == highestIndex) {
@@ -396,7 +396,7 @@ public class WinLogic {
                                     handValues.clear();  // clear the map since we have a new highest card
                                     handValues.computeIfAbsent(pairRank, k -> new ArrayList<>()).add(player);
                                     winner = player;
-                                    bestHand = handTypes.highestStraight;
+                                    bestHand = handTypes.highestPair;
                                     highestPairRank = pairRank;
 
                                 } else if(pairRank == highestPairRank) {
@@ -434,7 +434,7 @@ public class WinLogic {
                             handValues.clear();  // clear the map since we have a new highest card
                             handValues.computeIfAbsent(rankValue, k -> new ArrayList<>()).add(player);
                             winner = player;
-                            bestHand = handTypes.highestStraight;
+                            bestHand = handTypes.highCard;
                             highestValue = rankValue;
                         } else if(rankValue == highestValue) {
                             handValues.computeIfAbsent(rankValue, k -> new ArrayList<>()).add(player);
