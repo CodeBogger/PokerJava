@@ -1,9 +1,7 @@
 package com.example.javapoker;
 
-import java.net.JarURLConnection;
 import java.util.*;
-import java.util.jar.Attributes;
-import java.util.stream.Stream;
+
 
 public class WinLogic {
     public enum handTypes {
@@ -37,6 +35,10 @@ public class WinLogic {
         highestFourOfAKind(remainingPlayers, cards);
         highestStraightFlush(remainingPlayers, cards);
         royalFlush(remainingPlayers, cards);
+    }
+    private static int getIndex(String rank, String[] arr) {
+        for(int i=0; i<arr.length; i++) if(arr[i] == rank) return i;
+        return -1;
     }
 
     private static int countRank(Player player, List<Cards> cards, String rank) {
@@ -105,7 +107,7 @@ public class WinLogic {
                             count++;
                             if(count >= 5) {
                                 hasStraightFlush = true;
-                                tempHighFlushCard = Arrays.toString(ranks).indexOf(rank);
+                                tempHighFlushCard = getIndex(rank, ranks);
                             }
                         }
                     }
@@ -137,7 +139,7 @@ public class WinLogic {
             int tempRank = -2;
             for (String rank : ranks) {
                 if (countRank(player, cards, rank) >= 4) {
-                    tempRank = Arrays.asList(ranks).indexOf(rank);
+                    tempRank = getIndex(rank, ranks);
                 }
             }
             if (tempRank > highestRank) {
@@ -169,7 +171,7 @@ public class WinLogic {
             boolean hasFullHouse;
 
             for (String rank : ranks) {
-                int current = Arrays.toString(ranks).indexOf(rank);
+                int current = getIndex(rank, ranks);
                 if(countRank(player, cards, rank) == 3) {
                     playerRankThreePair = current;
                 } else if(countRank(player, cards, rank) == 2) {
@@ -178,6 +180,7 @@ public class WinLogic {
             }
             hasFullHouse = playerRankTwoPair != -1 && playerRankThreePair != -1 && playerRankTwoPair != playerRankThreePair;
             if (hasFullHouse && playerRankThreePair == higherThreePair) {
+                System.out.println(player.getName()+" HAS FULL HOUSE. 3 PAIR: "+playerRankThreePair+"... TWO PAIR: "+playerRankTwoPair);
                 handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
 
             } else if (playerRankThreePair > higherThreePair) {
@@ -212,7 +215,7 @@ public class WinLogic {
                         suitCount++;
 
                         if(suitCount >= 5) {
-                            highFlushCard = Arrays.toString(ranks).indexOf(rank);
+                            highFlushCard = getIndex(rank, ranks);
                             hasFlush = true;
                         }
                     }
@@ -263,7 +266,7 @@ public class WinLogic {
                     consecCard++;
                     if (consecCard >= 5) {
                         hasStraight = true;
-                        straightEnd.add(Arrays.toString(ranks).indexOf(rank));
+                        straightEnd.add(getIndex(rank, ranks));
                     }
                 } else {
                     consecCard = 0;
@@ -304,7 +307,7 @@ public class WinLogic {
             for (String rank : ranks) {
                 if (countRank(player, cards, rank) >= 3) {
                     hasThree = true;
-                    currHighestRank = Arrays.toString(ranks).indexOf(rank);
+                    currHighestRank = getIndex(rank, ranks);
                 }
             }
             if (hasThree && highestIndex == currHighestRank) {
@@ -339,16 +342,19 @@ public class WinLogic {
             int highPairRank = -1;
 
             for (String rank : ranks) {
-                if (countRank(player, cards, rank) == 2) pairs.add(Arrays.toString(ranks).indexOf(rank));
+                if (countRank(player, cards, rank) == 2) pairs.add(getIndex(rank, ranks));
 
                 if (pairs.size() >= 2) {
-                    Collections.sort(pairs);
-                    highPairRank = pairs.get(pairs.size() - 1);
+                    int highest = pairs.get(0);
+                    for(int i=1; i<pairs.size(); i++) highest = Math.max(highest, pairs.get(i));
+                    highPairRank = highest;
+                    System.out.println("HIGH FOR "+player.getName()+": "+highPairRank+"... HIGHEST: "+highestPairRank1+"... SIZE OF PAIRS: "+pairs.size());
                     hasTwoPair = true;
                 }
 
                 if (hasTwoPair && highPairRank == highestPairRank1 && !handValues.get(highestPairRank1).contains(player)) {
                     handValues.computeIfAbsent(highPairRank, k -> new ArrayList<>()).add(player);
+                    System.out.println("Player: "+player.getName()+". Has two pair: "+hasTwoPair+" IN 1");
 
                 } else if (highPairRank > highestPairRank1) {
                     handValues.clear();  // clear the map since we have a new highest card
@@ -356,6 +362,7 @@ public class WinLogic {
                     winner = player;
                     bestHand = handTypes.highestTwoPair;
                     highestPairRank1 = highPairRank;
+                    System.out.println("Player: "+player.getName()+". Has two pair: "+hasTwoPair+" IN 2");
                 }
 
             }
@@ -385,7 +392,7 @@ public class WinLogic {
                     if (playerHasCard(player, cards, suit, rank)) {
                         count++;
                         if (count >= 2) {
-                            pairRank = Arrays.asList(ranks).indexOf(rank);
+                            pairRank = getIndex(rank, ranks);
                             hasPair = true;
                         }
                     }
@@ -421,12 +428,12 @@ public class WinLogic {
             int tempHighest = -1;
 
             for (Cards card : PokerLogic.cardsList) {
-                int curr = Arrays.toString(ranks).indexOf(card.rank());
+                int curr = getIndex(card.rank(), ranks);
                 tempHighest = Math.max(curr, tempHighest);
             }
 
             for (Cards card : player.hand) {
-                int curr = Arrays.toString(ranks).indexOf(card.rank());
+                int curr = getIndex(card.rank(), ranks);
                 tempHighest = Math.max(curr, tempHighest);
             }
 
