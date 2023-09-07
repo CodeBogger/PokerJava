@@ -2,6 +2,7 @@ package com.example.javapoker;
 
 import java.net.JarURLConnection;
 import java.util.*;
+import java.util.jar.Attributes;
 import java.util.stream.Stream;
 
 public class WinLogic {
@@ -170,32 +171,27 @@ public class WinLogic {
 
         for (Player player : remainingPlayers) {
             int playerRankThreePair = -1; //if full house is existent, then assign the rank index and whoever maxes out the integer is the person with higher full house
-            String highestTripleRank = "";
-            String highestPairRank = "";
-            boolean hasFullHouse = false;
+            int playerRankTwoPair = -1;
+            boolean hasFullHouse;
 
             for (String rank : ranks) {
-                if (countRank(player, cards, rank) >= 2) {
-                    highestPairRank = rank;
-
-                } else if (countRank(player, cards, rank) >= 3) {
-                    highestTripleRank = rank;
-                }
-
-                if (!highestTripleRank.isEmpty() && !highestPairRank.isEmpty()) {
-                    playerRankThreePair = rank.indexOf(highestTripleRank);
-                    hasFullHouse = true;
+                int current = Arrays.toString(ranks).indexOf(rank);
+                if(countRank(player, cards, rank) == 3) {
+                    playerRankThreePair = current;
+                } else if(countRank(player, cards, rank) == 2) {
+                    playerRankTwoPair = current;
                 }
             }
-            if (playerRankThreePair > higherThreePair) {
+            hasFullHouse = playerRankTwoPair != -1 && playerRankThreePair != -1 && playerRankTwoPair != playerRankThreePair;
+            if (hasFullHouse && playerRankThreePair == higherThreePair) {
+                handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
+
+            } else if (playerRankThreePair > higherThreePair) {
                 handValues.clear();  // clear the map since we have a new highest card
                 handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player);
                 winner = player;
                 bestHand = handTypes.highestFullHouse;
                 higherThreePair = playerRankThreePair; //if full house is non-existent, the statement will not be called since -1 is not > -1
-
-            } else if (playerRankThreePair == higherThreePair && hasFullHouse) {
-                handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
             }
         }
         List<Player> playersWithSameHand = handValues.get(higherThreePair);
@@ -357,7 +353,7 @@ public class WinLogic {
                     hasTwoPair = true;
                 }
 
-                if (hasTwoPair && highPairRank == highestPairRank1) {
+                if (hasTwoPair && highPairRank == highestPairRank1 && !handValues.get(highestPairRank1).contains(player)) {
                     handValues.computeIfAbsent(highPairRank, k -> new ArrayList<>()).add(player);
 
                 } else if (highPairRank > highestPairRank1) {
