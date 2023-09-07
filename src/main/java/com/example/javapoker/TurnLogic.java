@@ -40,8 +40,6 @@ public class TurnLogic {
             } else if (choice == CHOICE.ALLIN) {
                 player.AllIn();
                 int allInCall = player.chips;
-
-                System.out.println("\n"+player.getName()+" decides to go all in! Amount to call: "+allInCall);
                 raiseAround(player, players, allInCall, scan);
                 break;
             }
@@ -72,11 +70,8 @@ public class TurnLogic {
                 }
                 case CHECK -> System.out.println("\n\n" + current.getName() + " DECIDES TO CHECK");
                 case FOLD -> {
-
-                    System.out.println("\n\n" + current.getName() + " DECIDES TO FOLD");
-                    players.remove(current);
                     i--;
-
+                    current.fold(current);
                     System.out.println("Remaining players:");
                     System.out.println("COUNT: "+players.size());
                     for (Player player : players) {
@@ -117,7 +112,6 @@ public class TurnLogic {
                     raiseAround(currentPlayer, players, allInAmount, scan);
                 }
                 case FOLD -> {
-                    System.out.println(currentPlayer.getName()+" decides to fold!");
                     players.remove(currentPlayer);
                     currentPlayer.fold(currentPlayer);
                 }

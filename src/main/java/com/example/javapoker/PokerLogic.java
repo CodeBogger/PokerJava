@@ -13,6 +13,7 @@ public class PokerLogic {
     static int pot;
     static Player winner = null;
     static Player user = null;
+    static List<Player> sameHandCase = new ArrayList<>();
     static void gameStart() {
         addPlayers();
         setBlinds();
@@ -24,7 +25,11 @@ public class PokerLogic {
             turnRiverHandling(deck, scan, currentPlayers);
 
             sleep();
-            setWinner();
+            if(setWinner() == -1) {
+                System.out.println("SAME HAND SIZE: "+WinLogic.sameHand.size());
+                sameHandCase = WinLogic.sameHand;
+                SplitLogic.split(sameHandCase, pot);
+            }
 
             sleep();
             reset();
@@ -43,10 +48,12 @@ public class PokerLogic {
         user.hand();
         System.out.println("----------------Your hand----------------\n");
     }
-    private static void setWinner() {
+    private static int setWinner() {
         winner = WinLogic.winStart(currentPlayers, cardsList);
+        if(winner == null) return -1;
         System.out.println("\n\n "+winner.getName()+" IS THE WINNER! \n");
         winner.chips += pot;
+        System.out.println("PLAYERS IN LIST: "+currentPlayers.size());
 
         System.out.println("---- The River ----");
         for(Cards card : cardsList) System.out.println(card.rank()+" of "+card.suit());
@@ -55,6 +62,7 @@ public class PokerLogic {
         System.out.println("\n---- Player's Hand ----");
         for(Cards card : winner.hand) System.out.println(card.rank()+" of "+card.suit());
         System.out.println("---- Player's Hand ----\n\n");
+        return 0;
     }
     private static void giveHands(Stack<Cards> deck, List<Player> currentPlayers) {
         int numPlayers = currentPlayers.size(), startIndex = currentPlayers.indexOf(littleBlind);
