@@ -95,36 +95,30 @@ public class WinLogic {
         HashMap<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
-            int tempHighFlushCard = -2;
+            int tempHighFlushCard = -1;
+            boolean hasStraightFlush = false;
 
             for (String suit : suits) {
-                for (int i = ranks.length - 1; i >= 4; i--) {
-                    boolean hasStraightFlush = true;
-                    int currentRank = 0;
-
-                    for (int j = i; j > i - 5; j--) {
-                        currentRank = i; // initialize the highest card from descending order
-                        if (!playerHasCard(player, cards, suit, ranks[j])) {
-                            hasStraightFlush = false;
-                            break;
+                    int count = 0;
+                    for(String rank : ranks) {
+                        if(playerHasCard(player, cards, rank, suit)) {
+                            count++;
+                            if(count >= 5) {
+                                hasStraightFlush = true;
+                                tempHighFlushCard = Arrays.toString(ranks).indexOf(rank);
+                            }
                         }
                     }
-                    if (hasStraightFlush) {
-                        tempHighFlushCard = currentRank; //if the straight flush is successful, assign the current to highest for that user
-                        break;
-                    }
-
-                }
             }
-            if (tempHighFlushCard > highestRankCard) {
+            if(hasStraightFlush && tempHighFlushCard == highestRankCard) {
+                handValues.computeIfAbsent(tempHighFlushCard, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
+
+            } else if (tempHighFlushCard > highestRankCard) {
                 handValues.clear();  // clear the map since we have a new highest card
                 handValues.computeIfAbsent(tempHighFlushCard, k -> new ArrayList<>()).add(player);
                 winner = player;
                 bestHand = handTypes.highestStraightFlush;
                 highestRankCard = tempHighFlushCard;
-
-            } else if (tempHighFlushCard == highestRankCard) {
-                handValues.computeIfAbsent(tempHighFlushCard, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
             }
         }
         List<Player> playersWithSameHand = handValues.get(highestRankCard);
