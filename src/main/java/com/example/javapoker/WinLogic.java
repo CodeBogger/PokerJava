@@ -38,7 +38,7 @@ public class WinLogic {
         royalFlush(remainingPlayers, cards);
     }
     private static int getIndex(String rank, String[] arr) {
-        for(int i=0; i<arr.length; i++) if(arr[i] == rank) return i;
+        for(int i=0; i<arr.length; i++) if(Objects.equals(arr[i], rank)) return i;
         return -1;
     }
 
@@ -52,22 +52,27 @@ public class WinLogic {
                 cards.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank));
     }
     private static void kicker(List<Cards> cards, List<Player> players, Map<Integer, List<Player>> map) {
-        Map<Integer, Player> bestHighCards = new HashMap<>();
-        int playerMax = -1;
+         int highestInDraw = -1;
+         List<Integer> highestHand = new ArrayList<>(); //add integer and get highest, corresponding to players
+         for(Cards card : cards) highestInDraw = Math.max(highestInDraw, getIndex(card.rank(), ranks));
 
-        for(Player player : players) {
-            int currentHighCard = -1;
-            for(Cards card : player.hand) currentHighCard = Math.max(getIndex(card.rank(), ranks), currentHighCard);
-            playerMax = Math.max(playerMax, currentHighCard);
-            bestHighCards.computeIfAbsent(currentHighCard, (Function<? super Integer, ? extends Player>) player);
-        }
+         for (Player player : players) {
+             int currMax = -1;
+             for (Cards card : player.hand) currMax = Math.max(currMax, getIndex(card.rank(), ranks));
+             highestHand.add(currMax);
+         }
+         if(highestInDraw >= Collections.max(highestHand)) return;
 
-        for(Cards card : cards) {
-            if(getIndex(card.rank(), ranks) >= playerMax) {
+         map.clear();
+         int indexMax = highestHand.indexOf(Collections.max(highestHand)); //get index of max integer in array... each number corresponds to player in (players) list
+         Player winningHand = players.get(indexMax);
 
-            }
-        }
-
+         winner = winningHand;
+         map.computeIfAbsent(Collections.max(highestHand), key -> {
+            List<Player> playerList = new ArrayList<>();
+            playerList.add(winningHand);
+            return playerList;
+        });
     }
     private static boolean hasNumber(Player player, List<Cards> cards, String rank) {
         return player.hand.stream().anyMatch(card -> card.rank().equals(rank)) || cards.stream().anyMatch(card -> card.rank().equals(rank));
@@ -200,7 +205,7 @@ public class WinLogic {
             if (hasFullHouse && playerRankThreePair == higherThreePair) {
                 handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
 
-            } else if (playerRankThreePair > higherThreePair) {
+            } else if (hasFullHouse && playerRankThreePair > higherThreePair) {
                 handValues.clear();  // clear the map since we have a new highest card
                 handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player);
                 winner = player;
@@ -385,6 +390,12 @@ public class WinLogic {
         boolean notNull = playersWithSameHand != null;
 
         if (notNull && playersWithSameHand.size() > 1) {
+            kicker(cards, playersWithSameHand, handValues);
+            if(handValues.size() == 1) {
+                sameHand = null;
+                return;
+            }
+
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestPairRank1);
@@ -426,8 +437,13 @@ public class WinLogic {
         List<Player> playersWithSameHand = handValues.get(highestPairRank);
         boolean notNull = playersWithSameHand != null;
 
-        kicker(cards, playersWithSameHand, (Map<Integer, List<Player>>) sameHand);
         if (notNull && playersWithSameHand.size() > 1) {
+            kicker(cards, playersWithSameHand, handValues); //the function will skip if there is no high card value > any hand and their ranks
+            if(handValues.size() == 1) {
+                sameHand = null;
+                return;
+            }
+
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestPairRank);
