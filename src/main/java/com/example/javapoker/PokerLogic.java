@@ -55,6 +55,14 @@ public class PokerLogic {
         winner.chips += pot;
         System.out.println("PLAYERS IN LIST: "+currentPlayers.size());
 
+        for(Player player : currentPlayers) {
+            if(winner == player) continue;
+            System.out.println("\n-------------------------------");
+            System.out.println(player.getName()+"'s hand: ");
+            player.hand();
+            System.out.println("\n-------------------------------\n");
+        }
+
         System.out.println("---- The River ----");
         for(Cards card : cardsList) System.out.println(card.rank()+" of "+card.suit());
         System.out.println("---- The River ----");

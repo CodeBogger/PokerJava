@@ -1,6 +1,7 @@
 package com.example.javapoker;
 
 import java.util.*;
+import java.util.function.Function;
 
 
 public class WinLogic {
@@ -50,7 +51,24 @@ public class WinLogic {
         return player.hand.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank)) ||
                 cards.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank));
     }
+    private static void kicker(List<Cards> cards, List<Player> players, Map<Integer, List<Player>> map) {
+        Map<Integer, Player> bestHighCards = new HashMap<>();
+        int playerMax = -1;
 
+        for(Player player : players) {
+            int currentHighCard = -1;
+            for(Cards card : player.hand) currentHighCard = Math.max(getIndex(card.rank(), ranks), currentHighCard);
+            playerMax = Math.max(playerMax, currentHighCard);
+            bestHighCards.computeIfAbsent(currentHighCard, (Function<? super Integer, ? extends Player>) player);
+        }
+
+        for(Cards card : cards) {
+            if(getIndex(card.rank(), ranks) >= playerMax) {
+
+            }
+        }
+
+    }
     private static boolean hasNumber(Player player, List<Cards> cards, String rank) {
         return player.hand.stream().anyMatch(card -> card.rank().equals(rank)) || cards.stream().anyMatch(card -> card.rank().equals(rank));
     }
@@ -180,7 +198,6 @@ public class WinLogic {
             }
             hasFullHouse = playerRankTwoPair != -1 && playerRankThreePair != -1 && playerRankTwoPair != playerRankThreePair;
             if (hasFullHouse && playerRankThreePair == higherThreePair) {
-                System.out.println(player.getName()+" HAS FULL HOUSE. 3 PAIR: "+playerRankThreePair+"... TWO PAIR: "+playerRankTwoPair);
                 handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
 
             } else if (playerRankThreePair > higherThreePair) {
@@ -260,16 +277,16 @@ public class WinLogic {
                 straightEnd.add(3);  // 5 is at index 3
             }
 
-            int consecCard = 0;
+            int consecutiveCount = 0;
             for (String rank : ranks) {
                 if (hasNumber(player, cards, rank)) {
-                    consecCard++;
-                    if (consecCard >= 5) {
+                    consecutiveCount++;
+                    if (consecutiveCount >= 5) {
                         hasStraight = true;
                         straightEnd.add(getIndex(rank, ranks));
                     }
                 } else {
-                    consecCard = 0;
+                    consecutiveCount = 0;
                 }
             }
             Collections.sort(straightEnd);
@@ -348,13 +365,11 @@ public class WinLogic {
                     int highest = pairs.get(0);
                     for(int i=1; i<pairs.size(); i++) highest = Math.max(highest, pairs.get(i));
                     highPairRank = highest;
-                    System.out.println("HIGH FOR "+player.getName()+": "+highPairRank+"... HIGHEST: "+highestPairRank1+"... SIZE OF PAIRS: "+pairs.size());
                     hasTwoPair = true;
                 }
 
                 if (hasTwoPair && highPairRank == highestPairRank1 && !handValues.get(highestPairRank1).contains(player)) {
                     handValues.computeIfAbsent(highPairRank, k -> new ArrayList<>()).add(player);
-                    System.out.println("Player: "+player.getName()+". Has two pair: "+hasTwoPair+" IN 1");
 
                 } else if (highPairRank > highestPairRank1) {
                     handValues.clear();  // clear the map since we have a new highest card
@@ -362,7 +377,6 @@ public class WinLogic {
                     winner = player;
                     bestHand = handTypes.highestTwoPair;
                     highestPairRank1 = highPairRank;
-                    System.out.println("Player: "+player.getName()+". Has two pair: "+hasTwoPair+" IN 2");
                 }
 
             }
@@ -374,13 +388,12 @@ public class WinLogic {
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestPairRank1);
-            System.out.println("LENGTH OF SAMEHAND: "+sameHand.size());
         } else if (notNull && playersWithSameHand.size() == 1) sameHand = null;
     }
 
     private static void highestPair(List<Player> remainingPlayers, List<Cards> cards) {
         int highestPairRank = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int pairRank = -1;
@@ -413,6 +426,7 @@ public class WinLogic {
         List<Player> playersWithSameHand = handValues.get(highestPairRank);
         boolean notNull = playersWithSameHand != null;
 
+        kicker(cards, playersWithSameHand, (Map<Integer, List<Player>>) sameHand);
         if (notNull && playersWithSameHand.size() > 1) {
             winner = null;
             sameHand = null;

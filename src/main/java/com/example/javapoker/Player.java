@@ -23,10 +23,8 @@ public class Player {
 
     }
     public boolean isAllIn() { return this.allIn; }
-    public void hand() {
-        for(Cards card : hand) System.out.println(card.rank()+" of "+card.suit());
-        System.out.println("\nCARD SIZE: "+hand.size()+"\n");
-    }
+    public void hand() { for(Cards card : hand) System.out.println(card.rank()+" of "+card.suit()); }
+
     public void AllIn() {
         System.out.println(this.getName()+" went all in!");
         this.allIn = true;
