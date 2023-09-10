@@ -6,7 +6,6 @@ import java.util.List;
 
 public class SplitLogic {
     public static void split(List<Player> players, int pot) {
-        if(SidePot.sidePotExist) pot -= SidePot.sidePot;
         int splitEach = pot/players.size();
 
         System.out.println("SPLIT!\n");

@@ -23,7 +23,7 @@ public class TurnLogic {
             choice = player instanceof PlayerUser ? PlayerUser.preFlopTurn(scan, player) : PlayerBot.preFlopTurn(player);
 
             if (choice == CHOICE.RAISE) {
-                int raise = player instanceof PlayerUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();
+                int raise = player instanceof PlayerUser ? PlayerUser.raiseTo(scan, player) : PlayerBot.raiseTo();
                 System.out.println("\n\n" + player.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
                 raiseAround(player, players, raise, scan);
                 break;
@@ -61,7 +61,7 @@ public class TurnLogic {
 
             switch (choice) {
                 case RAISE -> {
-                    int raise = isUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();
+                    int raise = isUser ? PlayerUser.raiseTo(scan, current) : PlayerBot.raiseTo();
                     PokerLogic.pot += raise;
 
                     System.out.println("\n\n" + current.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
@@ -116,7 +116,7 @@ public class TurnLogic {
                     currentPlayer.fold(currentPlayer);
                 }
                 case RAISE -> {
-                    int newRaise = isUser ? PlayerUser.raiseTo(scan) : PlayerBot.raiseTo();
+                    int newRaise = isUser ? PlayerUser.raiseTo(scan, currentPlayer) : PlayerBot.raiseTo();
                     totalRaise += newRaise;
 
                     if(currentPlayer.blindCallAmount != 0) {

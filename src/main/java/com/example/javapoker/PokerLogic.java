@@ -6,14 +6,9 @@ import static com.example.javapoker.Player.BlindType;
 
 public class PokerLogic {
     static List<Cards> cardsList = new ArrayList<>();
-    static List<Player> players = new ArrayList<>();
-    static List<Player> currentPlayers = new ArrayList<>();
-    static Player littleBlind;
-    static Player bigBlind;
+    static List<Player> currentPlayers = new ArrayList<>(), sameHandCase = new ArrayList<>(), players = new ArrayList<>();
+    static Player littleBlind, bigBlind, winner = null, user = null;
     static int pot;
-    static Player winner = null;
-    static Player user = null;
-    static List<Player> sameHandCase = new ArrayList<>();
     static void gameStart() {
         addPlayers();
         setBlinds();
@@ -50,8 +45,11 @@ public class PokerLogic {
     }
     private static int setWinner() {
         winner = WinLogic.winStart(currentPlayers, cardsList);
+        if(SidePot.sidePots.containsKey(winner)) SidePot.startSidePot(currentPlayers);
         if(winner == null) return -1;
+
         System.out.println("\n\n "+winner.getName()+" IS THE WINNER! \n");
+
         winner.chips += pot;
         System.out.println("PLAYERS IN LIST: "+currentPlayers.size());
 

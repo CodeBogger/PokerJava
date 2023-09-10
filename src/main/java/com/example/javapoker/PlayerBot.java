@@ -11,14 +11,12 @@ public class PlayerBot extends Player {
         TurnLogic.CHOICE[] choices = TurnLogic.CHOICE.values();
         return choices[rand.nextInt(choices.length)];
     }
-    public void allIn() { this.chips = 0; }
     public static TurnLogic.CHOICE allInFold(int allInAmount, Player bot) {
-        if(bot.chips >= allInAmount) {
-            TurnLogic.CHOICE[] choices = { TurnLogic.CHOICE.CALL, TurnLogic.CHOICE.ALLIN, TurnLogic.CHOICE.FOLD };
-            return choices[rand.nextInt(choices.length)];
-        }
         TurnLogic.CHOICE[] choices = {TurnLogic.CHOICE.ALLIN, TurnLogic.CHOICE.FOLD};
-        return choices[rand.nextInt(choices.length)];
+        TurnLogic.CHOICE res = choices[rand.nextInt(choices.length)];
+
+        if(res == TurnLogic.CHOICE.ALLIN) SidePot.addToSidePot(bot, allInAmount);
+        return res;
     }
     public static TurnLogic.CHOICE preFlopTurn(Player player) {
         TurnLogic.CHOICE[] choices;
@@ -32,9 +30,8 @@ public class PlayerBot extends Player {
         return choices[rand.nextInt(choices.length)];
     }
     public static TurnLogic.CHOICE callFoldRaise(int raise, Player player) {
-        if(player.chips - raise < 0) {
-            TurnLogic.CHOICE[] choices = { TurnLogic.CHOICE.ALLIN, TurnLogic.CHOICE.FOLD };
-            return choices[rand.nextInt(choices.length)];
+        if (player.chips - raise <= 0) {
+            return allInFold(raise, player);
         }
         TurnLogic.CHOICE[] choices = { TurnLogic.CHOICE.CALL, TurnLogic.CHOICE.RAISE, TurnLogic.CHOICE.FOLD, TurnLogic.CHOICE.ALLIN };
         return choices[rand.nextInt(choices.length)];
