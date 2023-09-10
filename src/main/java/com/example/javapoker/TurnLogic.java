@@ -25,6 +25,8 @@ public class TurnLogic {
             if (choice == CHOICE.RAISE) {
                 int raise = player instanceof PlayerUser ? PlayerUser.raiseTo(scan, player) : PlayerBot.raiseTo();
                 System.out.println("\n\n" + player.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
+
+                player.totalBetAmount += raise;
                 raiseAround(player, players, raise, scan);
                 break;
 
@@ -33,9 +35,10 @@ public class TurnLogic {
                 System.out.println("PLAYER COUNT: "+players.size());
 
             } else if (choice == CHOICE.CALL) {
-                player.call(0);
                 int callAmount = player.blindType == Player.BlindType.SMALLBLIND ? 15 : 30;
+                player.call(0);
 
+                player.totalBetAmount += callAmount;
                 System.out.println(player.getName() + " decides to call. " + callAmount + " chips have been deducted from their amount.");
             } else if (choice == CHOICE.ALLIN) {
                 player.AllIn();
@@ -63,6 +66,7 @@ public class TurnLogic {
                 case RAISE -> {
                     int raise = isUser ? PlayerUser.raiseTo(scan, current) : PlayerBot.raiseTo();
                     PokerLogic.pot += raise;
+                    current.totalBetAmount += raise;
 
                     System.out.println("\n\n" + current.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
                     raiseAround(current, players, raise, scan);
@@ -103,6 +107,7 @@ public class TurnLogic {
 
             switch (playerAction) {
                 case CALL -> {
+                    currentPlayer.totalBetAmount += totalRaise;
                     currentPlayer.call(totalRaise);
                     System.out.println(currentPlayer.getName()+" decides to call "+totalRaise);
                 }
@@ -122,6 +127,7 @@ public class TurnLogic {
                     if(currentPlayer.blindCallAmount != 0) {
                         currentPlayer.chips -= totalRaise + (30 - currentPlayer.blindCallAmount);
                     }
+                    currentPlayer.totalBetAmount += newRaise;
                     System.out.println(currentPlayer.getName() + " decides to re-raise. New raise amount: " + totalRaise);
                     raiseAround(currentPlayer, players, totalRaise, scan);
                     return;

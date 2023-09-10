@@ -18,6 +18,14 @@ public class SidePot {
     public static void startSidePot(List<Player> players) {
         winner.chips += sidePots.get(winner);
         players.remove(winner);
+
+        if(sidePots.size() > 1) {
+            for (Map.Entry<Player, Integer> entry : sidePots.entrySet()) {
+                if (entry.getKey() == winner) continue;
+                players.remove(entry.getKey());
+            }
+        }
         winner = WinLogic.winStart(players, PokerLogic.cardsList);
+        if(winner == null) SplitLogic.split(players, PokerLogic.pot);
     }
 }

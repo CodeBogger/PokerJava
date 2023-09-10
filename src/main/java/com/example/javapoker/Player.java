@@ -11,7 +11,7 @@ public class Player {
 
     }
     boolean allIn = false, inPreFlop = true;
-    int chips, blindCallAmount = 0;
+    int chips, blindCallAmount = 0, totalBetAmount = 0;
     boolean folded, calledBB = false, calledLB = false;
     String name;
     BlindType blindType;
@@ -30,6 +30,7 @@ public class Player {
     public void AllIn() {
         System.out.println(this.getName()+" went all in!");
         this.allIn = true;
+        totalBetAmount += this.chips;
         PokerLogic.pot += this.chips;
         chips = 0;
     }
