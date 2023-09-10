@@ -20,6 +20,10 @@ public class WinLogic {
         System.out.println("WINNERS HAND: " + bestHand.toString().toUpperCase());
         return winner;
     }
+    private static int getValueInSingle(Map<Integer, List<Player>> map) {
+        for (Map.Entry<Integer, List<Player>> entry : map.entrySet()) return entry.getKey();
+        return 0;
+    }
     private static void getHandValues(List<Player> remainingPlayers, List<Cards> cards) {
         highCard(remainingPlayers, cards);
         highestPair(remainingPlayers, cards);
@@ -61,6 +65,28 @@ public class WinLogic {
              }
              highestHand.add(currMax);
          }
+         //check if players have same kicker card
+         int max = -1;
+         List<Integer> maxKickerIndexes = new ArrayList<>();
+         for(int value : highestHand) {
+             if(value == max) {
+                 maxKickerIndexes.add(highestHand.indexOf(value));
+             } else if(value > max) {
+                 maxKickerIndexes.clear();
+                 maxKickerIndexes.add(highestHand.indexOf(value));
+             }
+         }
+
+         if(maxKickerIndexes.size() != 1) {
+             map.clear();
+             map.computeIfAbsent(max, key -> {
+                 List<Player> playerList = new ArrayList<>();
+                 for(int index : maxKickerIndexes) playerList.add(players.get(maxKickerIndexes.get(index)));
+                 return playerList;
+             });
+             return;
+         }
+
          if(highestInDraw >= Collections.max(highestHand)) return; //if card in deck is less or equal to any in all player's hand then return as split
 
          map.clear(); //if prev condition fails it means someone has a higher card than any in draw, clear hashmap to return winning player (everyone here has equal hand value in terms of pairs)
@@ -117,7 +143,7 @@ public class WinLogic {
 
     private static void highestStraightFlush(List<Player> remainingPlayers, List<Cards> cards) {
         int highestRankCard = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int tempHighFlushCard = -1;
@@ -157,7 +183,7 @@ public class WinLogic {
 
     private static void highestFourOfAKind(List<Player> remainingPlayers, List<Cards> cards) {
         int highestRank = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int tempRank = -2;
@@ -188,7 +214,7 @@ public class WinLogic {
 
     private static void highestFullHouse(List<Player> remainingPlayers, List<Cards> cards) {
         int higherThreePair = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int playerRankThreePair = -1; //if full house is existent, then assign the rank index and whoever maxes out the integer is the person with higher full house
@@ -226,7 +252,7 @@ public class WinLogic {
 
     private static void highestFlush(List<Player> remainingPlayers, List<Cards> cards) {
         int highestRank = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int highFlushCard = -1;
@@ -268,7 +294,7 @@ public class WinLogic {
 
     private static void highestStraight(List<Player> remainingPlayers, List<Cards> cards) {
         int highestAscendCard = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int highestRank = -1;
@@ -321,7 +347,7 @@ public class WinLogic {
 
     private static void highestThreeOfAKind(List<Player> remainingPlayers, List<Cards> cards) {
         int highestIndex = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
         Map<Player, List<Integer>> playerPairs = new HashMap<>();
 
         for (Player player : remainingPlayers) {
@@ -386,7 +412,7 @@ public class WinLogic {
 
                 if (hasTwoPair && highPairRank == highestPairRank1 && !handValues.get(highestPairRank1).contains(player)) {
                     handValues.computeIfAbsent(highPairRank, k -> new ArrayList<>()).add(player);
-                    playerPairs.computeIfAbsent(player, k -> { return pairs; });
+                    playerPairs.putIfAbsent(player, pairs);
 
                 } else if (highPairRank > highestPairRank1) {
                     handValues.clear();  // clear the map since we have a new highest card
@@ -402,7 +428,11 @@ public class WinLogic {
 
         if (sameHandSize > 1) {
             kicker(cards, handValues.get(highestPairRank1), handValues, playerPairs);
-            if(handValues.size() == 1) {
+            if(handValues.get(getValueInSingle(handValues)).size() == 1) {
+                /*
+                in kicker method the map "handvalues" is changed based on a condition
+                if condition changes (player list size), that means someone with a higher kicker wins
+                 */
                 sameHand = null;
                 return;
             }
@@ -438,7 +468,7 @@ public class WinLogic {
 
                 List<Integer> temp = new ArrayList<>();
                 temp.add(highestPairRank);
-                playerPairs.computeIfAbsent(player, k -> { return temp; });
+                playerPairs.putIfAbsent(player, temp);
 
             } else if (pairRank > highestPairRank) {
                 playerPairs.clear();
@@ -454,20 +484,20 @@ public class WinLogic {
 
         if (sameHandSize > 1) {
             kicker(cards, handValues.get(highestPairRank), handValues, playerPairs); //the function will skip if there is no high card value > any hand and their ranks
-            if(handValues.size() == 1) {
+            if(handValues.get(getValueInSingle(handValues)).size() == 1) {
                 sameHand = null;
                 return;
             }
 
             winner = null;
-            sameHand = null;
             sameHand = handValues.get(highestPairRank);
         } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highCard(List<Player> remainingPlayers, List<Cards> cards) {
         int highestValue = -1;
-        HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Player, List<Integer>> playerPairs = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int tempHighest = -1;
@@ -485,7 +515,12 @@ public class WinLogic {
             if (tempHighest == highestValue && tempHighest != -1) {
                 handValues.computeIfAbsent(tempHighest, k -> new ArrayList<>()).add(player);
 
+                List<Integer> pair = new ArrayList<>();
+                pair.add(tempHighest);
+                playerPairs.putIfAbsent(player, pair);
+
             } else if (tempHighest > highestValue) {
+                playerPairs.clear();
                 handValues.clear();  // clear the map since we have a new highest card
                 handValues.computeIfAbsent(tempHighest, k -> new ArrayList<>()).add(player);
                 winner = player;
@@ -495,8 +530,12 @@ public class WinLogic {
 
             int sameHandSize = handValues.get(highestValue).size();
             if (sameHandSize > 1) {
+                kicker(cards, remainingPlayers, handValues, playerPairs);
+                if(handValues.get(getValueInSingle(handValues)).size() == 1) {
+                    sameHand = null;
+                    return;
+                }
                 winner = null;
-                sameHand = null;
                 sameHand = handValues.get(highestValue);
             } else if (sameHandSize == 1) sameHand = null;
 

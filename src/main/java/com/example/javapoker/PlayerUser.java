@@ -112,7 +112,10 @@ public class PlayerUser extends Player {
                 System.out.print("Enter the amount to raise: ");
                 String userInput = scan.nextLine();
                 raiseAmount = Integer.parseInt(userInput);
-                if(raiseAmount > player.chips - 1) continue;
+                if(raiseAmount > player.chips - 1) {
+                    System.out.println("Please input a value that you can afford.");
+                    continue;
+                }
                 break;
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid numeric value.");
