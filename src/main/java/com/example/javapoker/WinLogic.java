@@ -146,12 +146,13 @@ public class WinLogic {
                 highestRankCard = tempHighFlushCard;
             }
         }
-        List<Player> playersWithSameHand = handValues.get(highestRankCard);
-        if (playersWithSameHand != null && playersWithSameHand.size() > 1) {
+        int sameHandSize = handValues.get(highestRankCard).size();
+
+        if (sameHandSize > 1) {
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestRankCard);
-        } else if (highestRankCard > -1) sameHand = null;
+        } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highestFourOfAKind(List<Player> remainingPlayers, List<Cards> cards) {
@@ -176,12 +177,13 @@ public class WinLogic {
                 handValues.computeIfAbsent(highestRank, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
             }
         }
-        List<Player> playersWithSameHand = handValues.get(highestRank);
-        if (playersWithSameHand != null && playersWithSameHand.size() > 1) {
+        int sameHandSize = handValues.get(highestRank).size();
+
+        if (sameHandSize > 1) {
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestRank);
-        } else if (highestRank > -1) sameHand = null;
+        } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highestFullHouse(List<Player> remainingPlayers, List<Cards> cards) {
@@ -213,12 +215,13 @@ public class WinLogic {
                 higherThreePair = playerRankThreePair; //if full house is non-existent, the statement will not be called since -1 is not > -1
             }
         }
-        List<Player> playersWithSameHand = handValues.get(higherThreePair);
-        if (playersWithSameHand != null && playersWithSameHand.size() > 1) {
+        int sameHandSize = handValues.get(higherThreePair).size();
+
+        if (sameHandSize > 1) {
             winner = null;
             sameHand = null;
             sameHand = handValues.get(higherThreePair);
-        } else if (higherThreePair > -1) sameHand = null;
+        } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highestFlush(List<Player> remainingPlayers, List<Cards> cards) {
@@ -254,14 +257,13 @@ public class WinLogic {
                 highestRank = highFlushCard;
             }
         }
-        List<Player> playersWithSameHand = handValues.get(highestRank);
-        boolean notNull = playersWithSameHand != null;
+        int sameHandSize = handValues.get(highestRank).size();
 
-        if (notNull && playersWithSameHand.size() > 1) {
+        if (sameHandSize > 1) {
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestRank);
-        } else if (notNull && playersWithSameHand.size() == 1) sameHand = null;
+        } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highestStraight(List<Player> remainingPlayers, List<Cards> cards) {
@@ -309,18 +311,18 @@ public class WinLogic {
             }
         }
 
-        List<Player> playersWithSameHand = handValues.get(highestAscendCard);
-        boolean notNull = playersWithSameHand != null;
+        int sameHandSize = handValues.get(highestAscendCard).size();
 
-        if (notNull && playersWithSameHand.size() > 1) {
+        if (sameHandSize > 1) {
             winner = null;
-            sameHand = playersWithSameHand;
-        } else if (notNull && playersWithSameHand.size() == 1) sameHand = null;
+            sameHand = handValues.get(highestAscendCard);
+        } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highestThreeOfAKind(List<Player> remainingPlayers, List<Cards> cards) {
         int highestIndex = -1;
         HashMap<Integer, List<Player>> handValues = new HashMap<>();
+        Map<Player, List<Integer>> playerPairs = new HashMap<>();
 
         for (Player player : remainingPlayers) {
             int currHighestRank = -1;
@@ -334,8 +336,16 @@ public class WinLogic {
             }
             if (hasThree && highestIndex == currHighestRank) {
                 handValues.computeIfAbsent(currHighestRank, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
+                int finalCurrHighestRank = currHighestRank;
+
+                playerPairs.computeIfAbsent(player, k -> {
+                    List<Integer> threePair = new ArrayList<>();
+                    threePair.add(finalCurrHighestRank);
+                    return threePair;
+                });
 
             } else if (currHighestRank > highestIndex) {
+                playerPairs.clear();
                 handValues.clear();  // clear the map since we have a new highest card
                 handValues.computeIfAbsent(currHighestRank, k -> new ArrayList<>()).add(player);
                 winner = player;
@@ -344,14 +354,14 @@ public class WinLogic {
             }
         }
 
-        List<Player> playersWithSameHand = handValues.get(highestIndex);
-        boolean notNull = playersWithSameHand != null;
+        int sameHandSize = handValues.get(highestIndex).size();
 
-        if (notNull && playersWithSameHand.size() > 1) {
+        if (sameHandSize > 1) {
+            kicker(cards, handValues.get(highestIndex), handValues, playerPairs);
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestIndex);
-        } else if (notNull && playersWithSameHand.size() == 1) sameHand = null;
+        } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highestTwoPair(List<Player> remainingPlayers, List<Cards> cards) {
@@ -388,11 +398,10 @@ public class WinLogic {
 
             }
         }
-        List<Player> playersWithSameHand = handValues.get(highestPairRank1);
-        boolean notNull = playersWithSameHand != null;
+        int sameHandSize = handValues.get(highestPairRank1).size();
 
-        if (notNull && playersWithSameHand.size() > 1) {
-            kicker(cards, playersWithSameHand, handValues, playerPairs);
+        if (sameHandSize > 1) {
+            kicker(cards, handValues.get(highestPairRank1), handValues, playerPairs);
             if(handValues.size() == 1) {
                 sameHand = null;
                 return;
@@ -401,7 +410,7 @@ public class WinLogic {
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestPairRank1);
-        } else if (notNull && playersWithSameHand.size() == 1) sameHand = null;
+        } else if (sameHandSize == 1) sameHand = null;
     }
     private static void highestPair(List<Player> remainingPlayers, List<Cards> cards) {
         int highestPairRank = -1;
@@ -441,11 +450,10 @@ public class WinLogic {
             }
 
         }
-        List<Player> playersWithSameHand = handValues.get(highestPairRank);
-        boolean notNull = playersWithSameHand != null;
+        int sameHandSize = handValues.get(highestPairRank).size();
 
-        if (notNull && playersWithSameHand.size() > 1) {
-            kicker(cards, playersWithSameHand, handValues, playerPairs); //the function will skip if there is no high card value > any hand and their ranks
+        if (sameHandSize > 1) {
+            kicker(cards, handValues.get(highestPairRank), handValues, playerPairs); //the function will skip if there is no high card value > any hand and their ranks
             if(handValues.size() == 1) {
                 sameHand = null;
                 return;
@@ -454,7 +462,7 @@ public class WinLogic {
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestPairRank);
-        } else if (notNull && playersWithSameHand.size() == 1) sameHand = null;
+        } else if (sameHandSize == 1) sameHand = null;
     }
 
     private static void highCard(List<Player> remainingPlayers, List<Cards> cards) {
@@ -485,14 +493,12 @@ public class WinLogic {
                 highestValue = tempHighest;
             }
 
-            List<Player> playersWithSameHand = handValues.get(highestValue);
-            boolean notNull = playersWithSameHand != null;
-
-            if (notNull && playersWithSameHand.size() > 1) {
+            int sameHandSize = handValues.get(highestValue).size();
+            if (sameHandSize > 1) {
                 winner = null;
                 sameHand = null;
                 sameHand = handValues.get(highestValue);
-            } else if (notNull && playersWithSameHand.size() == 1) sameHand = null;
+            } else if (sameHandSize == 1) sameHand = null;
 
         }
     }
