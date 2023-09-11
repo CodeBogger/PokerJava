@@ -1,6 +1,7 @@
 package com.example.javapoker;
 
 import java.util.*;
+import java.util.zip.ZipOutputStream;
 
 public class WinLogic {
     public enum handTypes {
@@ -49,14 +50,14 @@ public class WinLogic {
         return player.hand.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank)) ||
                 cards.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank));
     }
-    private static void kicker(List<Cards> cards, List<Player> players, Map<Integer, List<Player>> map, Map<Player, List<Integer>> pairs) {
+    private static boolean kicker(List<Cards> cards, List<Player> players, Map<Integer, List<Player>> map, Map<Player, List<Integer>> pairs) {
          int highestInDraw = -1;
          List<Integer> highestHand = new ArrayList<>(); //add integer and get highest, corresponding to players
          for(Cards card : cards) highestInDraw = Math.max(highestInDraw, getIndex(card.rank(), ranks));
 
          for (Player player : players) {
              int currMax = -1;
-             List<Integer> playerPairs = pairs.get(player);
+             List<Integer> playerPairs = pairs.getOrDefault(player, new ArrayList<>());
 
              for (Cards card : player.hand) {
                  int pair = getIndex(card.rank(), ranks);
@@ -84,10 +85,10 @@ public class WinLogic {
                  for(int index : maxKickerIndexes) playerList.add(players.get(maxKickerIndexes.get(index)));
                  return playerList;
              });
-             return;
+             return true;
          }
 
-         if(highestInDraw >= Collections.max(highestHand)) return; //if card in deck is less or equal to any in all player's hand then return as split
+         if(highestInDraw >= Collections.max(highestHand)) return false; //if card in deck is less or equal to any in all player's hand then return as split
 
          map.clear(); //if prev condition fails it means someone has a higher card than any in draw, clear hashmap to return winning player (everyone here has equal hand value in terms of pairs)
          int indexMax = highestHand.indexOf(Collections.max(highestHand)); //get index of max integer in array... each number corresponds to player in (players) list
@@ -99,6 +100,7 @@ public class WinLogic {
             playerList.add(winningHand);
             return playerList;
         });
+         return true;
     }
     private static boolean hasNumber(Player player, List<Cards> cards, String rank) {
         return player.hand.stream().anyMatch(card -> card.rank().equals(rank)) || cards.stream().anyMatch(card -> card.rank().equals(rank));
@@ -166,12 +168,20 @@ public class WinLogic {
 
             } else if (tempHighFlushCard > highestRankCard) {
                 handValues.clear();  // clear the map since we have a new highest card
-                handValues.computeIfAbsent(tempHighFlushCard, k -> new ArrayList<>()).add(player);
+
+                handValues.computeIfAbsent(tempHighFlushCard, k -> {
+                    List<Player> temp = new ArrayList<>();
+                    temp.add(player);
+                    return temp;
+                });
+
+
                 winner = player;
                 bestHand = handTypes.highestStraightFlush;
                 highestRankCard = tempHighFlushCard;
             }
         }
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(highestRankCard).size();
 
         if (sameHandSize > 1) {
@@ -186,23 +196,33 @@ public class WinLogic {
         Map<Integer, List<Player>> handValues = new HashMap<>();
 
         for (Player player : remainingPlayers) {
-            int tempRank = -2;
+            int tempRank = -1;
+            boolean hasFour = false;
+
             for (String rank : ranks) {
                 if (countRank(player, cards, rank) >= 4) {
                     tempRank = getIndex(rank, ranks);
+                    hasFour = true;
                 }
             }
-            if (tempRank > highestRank) {
+            if (hasFour && tempRank == highestRank) {
+                handValues.computeIfAbsent(highestRank, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
+
+            } else if (tempRank > highestRank) {
                 handValues.clear();  // clear the map since we have a new highest card
-                handValues.computeIfAbsent(tempRank, k -> new ArrayList<>()).add(player);
+
+                handValues.computeIfAbsent(tempRank, k -> {
+                    List<Player> temp = new ArrayList<>();
+                    temp.add(player);
+                    return temp;
+                });
+
                 winner = player;
                 bestHand = handTypes.highestFourOfAKind;
                 highestRank = tempRank;
-
-            } else if (tempRank == highestRank) {
-                handValues.computeIfAbsent(highestRank, k -> new ArrayList<>()).add(player); //if 2 or more players have the same hand, add to same key
             }
         }
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(highestRank).size();
 
         if (sameHandSize > 1) {
@@ -235,12 +255,19 @@ public class WinLogic {
 
             } else if (hasFullHouse && playerRankThreePair > higherThreePair) {
                 handValues.clear();  // clear the map since we have a new highest card
-                handValues.computeIfAbsent(playerRankThreePair, k -> new ArrayList<>()).add(player);
+
+                handValues.computeIfAbsent(playerRankThreePair, k -> {
+                    List<Player> temp = new ArrayList<>();
+                    temp.add(player);
+                    return temp;
+                });
+
                 winner = player;
                 bestHand = handTypes.highestFullHouse;
                 higherThreePair = playerRankThreePair; //if full house is non-existent, the statement will not be called since -1 is not > -1
             }
         }
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(higherThreePair).size();
 
         if (sameHandSize > 1) {
@@ -277,12 +304,18 @@ public class WinLogic {
 
             } else if (highFlushCard > highestRank) {
                 handValues.clear();  // clear the map since we have a new highest card
-                handValues.computeIfAbsent(highFlushCard, k -> new ArrayList<>()).add(player);
+                handValues.computeIfAbsent(highestRank, k -> {
+                    List<Player> temp = new ArrayList<>();
+                    temp.add(player);
+                    return temp;
+                });
+
                 winner = player;
                 bestHand = handTypes.highestFlush;
                 highestRank = highFlushCard;
             }
         }
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(highestRank).size();
 
         if (sameHandSize > 1) {
@@ -330,13 +363,18 @@ public class WinLogic {
 
             } else if (highestRank > highestAscendCard) {
                 handValues.clear();
-                handValues.computeIfAbsent(highestRank, k -> new ArrayList<>()).add(player);
+
+                handValues.computeIfAbsent(highestRank, k -> {
+                    List<Player> temp = new ArrayList<>();
+                    temp.add(player);
+                    return temp;
+                });
                 winner = player;
                 bestHand = handTypes.highestStraight;
                 highestAscendCard = highestRank;
             }
         }
-
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(highestAscendCard).size();
 
         if (sameHandSize > 1) {
@@ -373,17 +411,29 @@ public class WinLogic {
             } else if (currHighestRank > highestIndex) {
                 playerPairs.clear();
                 handValues.clear();  // clear the map since we have a new highest card
-                handValues.computeIfAbsent(currHighestRank, k -> new ArrayList<>()).add(player);
+
+                handValues.computeIfAbsent(currHighestRank, k -> {
+                    List<Player> tempPlayer = new ArrayList<>();
+                    tempPlayer.add(player);
+                    return tempPlayer;
+                });
+
+                int highestFinal = currHighestRank;
+                playerPairs.computeIfAbsent(player, k -> { return Collections.singletonList(highestFinal); });
+
                 winner = player;
                 bestHand = handTypes.highestThreeOfAKind;
                 highestIndex = currHighestRank;
             }
         }
-
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(highestIndex).size();
 
         if (sameHandSize > 1) {
-            kicker(cards, handValues.get(highestIndex), handValues, playerPairs);
+            if(kicker(cards, handValues.get(highestIndex), handValues, playerPairs)) {
+                sameHand = null;
+                return;
+            }
             winner = null;
             sameHand = null;
             sameHand = handValues.get(highestIndex);
@@ -410,25 +460,36 @@ public class WinLogic {
                     hasTwoPair = true;
                 }
 
-                if (hasTwoPair && highPairRank == highestPairRank1 && !handValues.get(highestPairRank1).contains(player)) {
+                List<Player> playersWithSameRank = handValues.get(highestPairRank1);
+                if (hasTwoPair && highPairRank == highestPairRank1 && (playersWithSameRank == null || !playersWithSameRank.contains(player))) {
+
                     handValues.computeIfAbsent(highPairRank, k -> new ArrayList<>()).add(player);
                     playerPairs.putIfAbsent(player, pairs);
 
                 } else if (highPairRank > highestPairRank1) {
                     handValues.clear();  // clear the map since we have a new highest card
-                    handValues.computeIfAbsent(highPairRank, k -> new ArrayList<>()).add(player);
+                    playerPairs.clear();
+
+                    handValues.computeIfAbsent(highPairRank, k -> {
+                        List<Player> tempPlayers = new ArrayList<>();
+                        tempPlayers.add(player);
+                        return tempPlayers;
+                    });
+                    playerPairs.computeIfAbsent(player, k -> { return pairs; });
+
                     winner = player;
                     bestHand = handTypes.highestTwoPair;
+
                     highestPairRank1 = highPairRank;
                 }
 
             }
         }
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(highestPairRank1).size();
 
         if (sameHandSize > 1) {
-            kicker(cards, handValues.get(highestPairRank1), handValues, playerPairs);
-            if(handValues.get(getValueInSingle(handValues)).size() == 1) {
+            if(kicker(cards, handValues.get(highestPairRank1), handValues, playerPairs)) {
                 /*
                 in kicker method the map "handvalues" is changed based on a condition
                 if condition changes (player list size), that means someone with a higher kicker wins
@@ -467,24 +528,33 @@ public class WinLogic {
                 handValues.computeIfAbsent(pairRank, k -> new ArrayList<>()).add(player);
 
                 List<Integer> temp = new ArrayList<>();
-                temp.add(highestPairRank);
+                temp.add(pairRank);
                 playerPairs.putIfAbsent(player, temp);
 
             } else if (pairRank > highestPairRank) {
                 playerPairs.clear();
                 handValues.clear();  // clear the map since we have a new highest card
-                handValues.computeIfAbsent(pairRank, k -> new ArrayList<>()).add(player);
+
+                handValues.computeIfAbsent(pairRank, k -> {
+                    List<Player> tempPlayers = new ArrayList<>();
+                    tempPlayers.add(player);
+                    return tempPlayers;
+                });
+                int highFinal = pairRank;
+                playerPairs.computeIfAbsent(player, k -> { return Collections.singletonList(highFinal); });
+
                 winner = player;
                 bestHand = handTypes.highestPair;
                 highestPairRank = pairRank;
             }
 
         }
+        if(handValues.isEmpty()) return;
         int sameHandSize = handValues.get(highestPairRank).size();
 
         if (sameHandSize > 1) {
-            kicker(cards, handValues.get(highestPairRank), handValues, playerPairs); //the function will skip if there is no high card value > any hand and their ranks
-            if(handValues.get(getValueInSingle(handValues)).size() == 1) {
+            //the function will skip if there is no high card value > any hand and their ranks
+            if(kicker(cards, handValues.get(highestPairRank), handValues, playerPairs)) {
                 sameHand = null;
                 return;
             }
@@ -522,23 +592,32 @@ public class WinLogic {
             } else if (tempHighest > highestValue) {
                 playerPairs.clear();
                 handValues.clear();  // clear the map since we have a new highest card
-                handValues.computeIfAbsent(tempHighest, k -> new ArrayList<>()).add(player);
+
+                handValues.computeIfAbsent(tempHighest, k -> {
+                    List<Player> tempPlayers = new ArrayList<>();
+                    tempPlayers.add(player);
+                    return tempPlayers;
+                });
+
+                int highestFinal = tempHighest;
+                playerPairs.computeIfAbsent(player, k -> { return Collections.singletonList(highestFinal); });
+
                 winner = player;
                 bestHand = handTypes.highCard;
                 highestValue = tempHighest;
             }
 
-            int sameHandSize = handValues.get(highestValue).size();
-            if (sameHandSize > 1) {
-                kicker(cards, remainingPlayers, handValues, playerPairs);
-                if(handValues.get(getValueInSingle(handValues)).size() == 1) {
-                    sameHand = null;
-                    return;
-                }
-                winner = null;
-                sameHand = handValues.get(highestValue);
-            } else if (sameHandSize == 1) sameHand = null;
-
         }
+        if(handValues.isEmpty()) return;
+        int sameHandSize = handValues.get(highestValue).size();
+
+        if (sameHandSize > 1) {
+            if(kicker(cards, remainingPlayers, handValues, playerPairs)) {
+                sameHand = null;
+                return;
+            }
+            winner = null;
+            sameHand = handValues.get(highestValue);
+        } else if (sameHandSize == 1) sameHand = null;
     }
 }
