@@ -1,6 +1,7 @@
-package com.example.javapoker;
+package com.JavaPoker.javapoker.GameLogic;
 
-import javafx.geometry.Side;
+import com.JavaPoker.javapoker.CardsLogic.Cards;
+import com.JavaPoker.javapoker.PlayerObject.Player;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class SplitLogic {
         }
         for(Player player : players) {
             System.out.println("\nPLAYER: "+player.getName());
-            player.chips += splitEach;
+            player.addToBet(splitEach);
             player.hand();
             System.out.println("\n");
         }

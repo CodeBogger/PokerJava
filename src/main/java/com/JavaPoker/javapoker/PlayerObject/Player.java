@@ -1,8 +1,10 @@
-package com.example.javapoker;
+package com.JavaPoker.javapoker.PlayerObject;
+
+import com.JavaPoker.javapoker.CardsLogic.Cards;
+import com.JavaPoker.javapoker.GameLogic.PokerLogic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 public class Player {
     public enum BlindType {
@@ -31,17 +33,27 @@ public class Player {
         System.out.println(this.getName()+" went all in!");
         this.allIn = true;
         totalBetAmount += this.chips;
-        PokerLogic.pot += this.chips;
+        PokerLogic.addToPot(this.chips);
         chips = 0;
     }
+    public int getBlindCallAmount() { return this.blindCallAmount; }
+    public boolean isFolded() { return this.folded; }
+    public void outOfPreFlop() {
+        this.blindCallAmount = 0;
+        this.inPreFlop = false;
+    }
+    public int getChips() { return this.chips; }
+    public void addToBet(int amount) { this.totalBetAmount += amount; }
+    public List<Cards> getHand() { return this.hand; }
+    public void addToChips(int x) { this.chips += x; }
     public void call(int initial) {
         int amountToCall = initial + (this.inPreFlop ? (30 - this.blindCallAmount) : 0);
         this.chips -= amountToCall;
-        PokerLogic.pot += amountToCall;
+        PokerLogic.addToPot(amountToCall);
     }
     public void fold(Player player) {
         this.folded = true;
-        PokerLogic.currentPlayers.remove(player);
+        PokerLogic.removePlayer(player);
         System.out.println(player.getName()+" decided to fold!");
     }
     public void addHand(Cards card) {

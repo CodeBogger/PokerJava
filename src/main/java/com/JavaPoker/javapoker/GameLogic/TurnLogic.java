@@ -1,4 +1,8 @@
-package com.example.javapoker;
+package com.JavaPoker.javapoker.GameLogic;
+
+import com.JavaPoker.javapoker.PlayerObject.Player;
+import com.JavaPoker.javapoker.PlayerObject.PlayerBot;
+import com.JavaPoker.javapoker.PlayerObject.PlayerUser;
 
 import java.util.*;
 public class TurnLogic {
@@ -26,7 +30,7 @@ public class TurnLogic {
                 int raise = player instanceof PlayerUser ? PlayerUser.raiseTo(scan, player) : PlayerBot.raiseTo();
                 System.out.println("\n\n" + player.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
 
-                player.totalBetAmount += raise;
+                player.addToBet(raise);
                 raiseAround(player, players, raise, scan);
                 break;
 
@@ -35,21 +39,21 @@ public class TurnLogic {
                 System.out.println("PLAYER COUNT: "+players.size());
 
             } else if (choice == CHOICE.CALL) {
-                int callAmount = player.blindType == Player.BlindType.SMALLBLIND ? 15 : 30;
+                int callAmount = player.getBlindType() == Player.BlindType.SMALLBLIND ? 15 : 30;
                 player.call(0);
 
-                player.totalBetAmount += callAmount;
+                player.addToBet(callAmount);
                 System.out.println(player.getName() + " decides to call. " + callAmount + " chips have been deducted from their amount.");
             } else if (choice == CHOICE.ALLIN) {
+                int allInCall = player.getChips();
                 player.AllIn();
-                int allInCall = player.chips;
                 raiseAround(player, players, allInCall, scan);
                 break;
             }
             if(players.size() == 1) break;
         }
 
-        for(Player player : players) { player.blindCallAmount = 0; player.inPreFlop = false; }
+        for(Player player : players) { player.outOfPreFlop(); }
     }
 
     public static void turns(List<Player> players, Scanner scan) {
@@ -66,7 +70,7 @@ public class TurnLogic {
                 case RAISE -> {
                     int raise = isUser ? PlayerUser.raiseTo(scan, current) : PlayerBot.raiseTo();
                     PokerLogic.pot += raise;
-                    current.totalBetAmount += raise;
+                    current.addToBet(raise);
 
                     System.out.println("\n\n" + current.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
                     raiseAround(current, players, raise, scan);
@@ -83,7 +87,7 @@ public class TurnLogic {
                     }
                 }
                 case ALLIN -> {
-                    int allInAmount = current.chips;
+                    int allInAmount = current.getChips();
                     current.AllIn();
                     raiseAround(current, players, allInAmount, scan);
                     return;
@@ -107,12 +111,12 @@ public class TurnLogic {
 
             switch (playerAction) {
                 case CALL -> {
-                    currentPlayer.totalBetAmount += totalRaise;
+                    currentPlayer.addToBet(totalRaise);
                     currentPlayer.call(totalRaise);
                     System.out.println(currentPlayer.getName()+" decides to call "+totalRaise);
                 }
                 case ALLIN -> {
-                    int allInAmount = currentPlayer.chips;
+                    int allInAmount = currentPlayer.getChips();
                     currentPlayer.AllIn();
                     raiseAround(currentPlayer, players, allInAmount, scan);
                 }
@@ -124,10 +128,10 @@ public class TurnLogic {
                     int newRaise = isUser ? PlayerUser.raiseTo(scan, currentPlayer) : PlayerBot.raiseTo();
                     totalRaise += newRaise;
 
-                    if(currentPlayer.blindCallAmount != 0) {
-                        currentPlayer.chips -= totalRaise + (30 - currentPlayer.blindCallAmount);
+                    if(currentPlayer.getBlindCallAmount() != 0) {
+                        currentPlayer.call(totalRaise + (30 - currentPlayer.getBlindCallAmount()));
                     }
-                    currentPlayer.totalBetAmount += newRaise;
+                    currentPlayer.addToBet(newRaise);
                     System.out.println(currentPlayer.getName() + " decides to re-raise. New raise amount: " + totalRaise);
                     raiseAround(currentPlayer, players, totalRaise, scan);
                     return;

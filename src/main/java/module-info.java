@@ -1,4 +1,4 @@
-module com.example.javapoker {
+module com.JavaPoker.javapoker {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -12,6 +12,12 @@ module com.example.javapoker {
     requires com.almasb.fxgl.all;
     requires java.desktop;
 
-    opens com.example.javapoker to javafx.fxml;
-    exports com.example.javapoker;
+    exports com.JavaPoker.javapoker.CardsLogic;
+    opens com.JavaPoker.javapoker.CardsLogic to javafx.fxml;
+    exports com.JavaPoker.javapoker.Graphics;
+    opens com.JavaPoker.javapoker.Graphics to javafx.fxml;
+    exports com.JavaPoker.javapoker.PlayerObject;
+    opens com.JavaPoker.javapoker.PlayerObject to javafx.fxml;
+    exports com.JavaPoker.javapoker.GameLogic;
+    opens com.JavaPoker.javapoker.GameLogic to javafx.fxml;
 }

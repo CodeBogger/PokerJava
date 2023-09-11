@@ -1,14 +1,16 @@
-package com.example.javapoker;
+package com.JavaPoker.javapoker.GameLogic;
+
+import com.JavaPoker.javapoker.CardsLogic.Cards;
+import com.JavaPoker.javapoker.PlayerObject.Player;
 
 import java.util.*;
-import java.util.zip.ZipOutputStream;
 
 public class WinLogic {
     public enum handTypes {
         highCard, highestPair, highestTwoPair, highestThreeOfAKind, highestStraight, highestFlush, highestFullHouse, highestFourOfAKind, highestStraightFlush, royalFlush,
     }
-    static String[] suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
-    public static String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
+    static final String[] suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
+    static final String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
     static Player winner = null;
     static handTypes bestHand = null;
     static List<Player> sameHand = null;
@@ -20,10 +22,6 @@ public class WinLogic {
         //get highest hand
         System.out.println("WINNERS HAND: " + bestHand.toString().toUpperCase());
         return winner;
-    }
-    private static int getValueInSingle(Map<Integer, List<Player>> map) {
-        for (Map.Entry<Integer, List<Player>> entry : map.entrySet()) return entry.getKey();
-        return 0;
     }
     private static void getHandValues(List<Player> remainingPlayers, List<Cards> cards) {
         highCard(remainingPlayers, cards);
@@ -37,32 +35,32 @@ public class WinLogic {
         highestStraightFlush(remainingPlayers, cards);
         royalFlush(remainingPlayers, cards);
     }
-    private static int getIndex(String rank, String[] arr) {
-        for(int i=0; i<arr.length; i++) if(Objects.equals(arr[i], rank)) return i;
+    private static int getIndex(String rank) {
+        for(int i = 0; i< WinLogic.ranks.length; i++) if(Objects.equals(WinLogic.ranks[i], rank)) return i;
         return -1;
     }
     private static int countRank(Player player, List<Cards> cards, String rank) {
-        long countInHand = player.hand.stream().filter(card -> card.rank().equals(rank)).count();
+        long countInHand = player.getHand().stream().filter(card -> card.rank().equals(rank)).count();
         long countInCommunity = cards.stream().filter(card -> card.rank().equals(rank)).count();
         return (int) (countInHand + countInCommunity);
     }
     private static boolean playerHasCard(Player player, List<Cards> cards, String suit, String rank) {
-        return player.hand.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank)) ||
+        return player.getHand().stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank)) ||
                 cards.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank));
     }
     private static boolean kicker(List<Cards> cards, List<Player> players, Map<Integer, List<Player>> map, Map<Player, List<Integer>> pairs) {
          int highestInDraw = -1;
          List<Integer> highestHand = new ArrayList<>(); //add integer and get highest, corresponding to players
-         for(Cards card : cards) highestInDraw = Math.max(highestInDraw, getIndex(card.rank(), ranks));
+         for(Cards card : cards) highestInDraw = Math.max(highestInDraw, getIndex(card.rank()));
 
          for (Player player : players) {
              int currMax = -1;
              List<Integer> playerPairs = pairs.getOrDefault(player, new ArrayList<>());
 
-             for (Cards card : player.hand) {
-                 int pair = getIndex(card.rank(), ranks);
+             for (Cards card : player.getHand()) {
+                 int pair = getIndex(card.rank());
                  if(playerPairs.contains(pair)) continue;
-                 currMax = Math.max(currMax, getIndex(card.rank(), ranks));
+                 currMax = Math.max(currMax, getIndex(card.rank()));
              }
              highestHand.add(currMax);
          }
@@ -103,7 +101,7 @@ public class WinLogic {
          return true;
     }
     private static boolean hasNumber(Player player, List<Cards> cards, String rank) {
-        return player.hand.stream().anyMatch(card -> card.rank().equals(rank)) || cards.stream().anyMatch(card -> card.rank().equals(rank));
+        return player.getHand().stream().anyMatch(card -> card.rank().equals(rank)) || cards.stream().anyMatch(card -> card.rank().equals(rank));
     }
 
     private static boolean rFInDraw(List<Cards> cards) {
@@ -158,7 +156,7 @@ public class WinLogic {
                             count++;
                             if(count >= 5) {
                                 hasStraightFlush = true;
-                                tempHighFlushCard = getIndex(rank, ranks);
+                                tempHighFlushCard = getIndex(rank);
                             }
                         }
                     }
@@ -201,7 +199,7 @@ public class WinLogic {
 
             for (String rank : ranks) {
                 if (countRank(player, cards, rank) >= 4) {
-                    tempRank = getIndex(rank, ranks);
+                    tempRank = getIndex(rank);
                     hasFour = true;
                 }
             }
@@ -242,7 +240,7 @@ public class WinLogic {
             boolean hasFullHouse;
 
             for (String rank : ranks) {
-                int current = getIndex(rank, ranks);
+                int current = getIndex(rank);
                 if(countRank(player, cards, rank) == 3) {
                     playerRankThreePair = current;
                 } else if(countRank(player, cards, rank) == 2) {
@@ -293,7 +291,7 @@ public class WinLogic {
                         suitCount++;
 
                         if(suitCount >= 5) {
-                            highFlushCard = getIndex(rank, ranks);
+                            highFlushCard = getIndex(rank);
                             hasFlush = true;
                         }
                     }
@@ -349,7 +347,7 @@ public class WinLogic {
                     consecutiveCount++;
                     if (consecutiveCount >= 5) {
                         hasStraight = true;
-                        straightEnd.add(getIndex(rank, ranks));
+                        straightEnd.add(getIndex(rank));
                     }
                 } else {
                     consecutiveCount = 0;
@@ -395,7 +393,7 @@ public class WinLogic {
             for (String rank : ranks) {
                 if (countRank(player, cards, rank) >= 3) {
                     hasThree = true;
-                    currHighestRank = getIndex(rank, ranks);
+                    currHighestRank = getIndex(rank);
                 }
             }
             if (hasThree && highestIndex == currHighestRank) {
@@ -419,7 +417,7 @@ public class WinLogic {
                 });
 
                 int highestFinal = currHighestRank;
-                playerPairs.computeIfAbsent(player, k -> { return Collections.singletonList(highestFinal); });
+                playerPairs.computeIfAbsent(player, k -> Collections.singletonList(highestFinal));
 
                 winner = player;
                 bestHand = handTypes.highestThreeOfAKind;
@@ -451,7 +449,7 @@ public class WinLogic {
             int highPairRank = -1;
 
             for (String rank : ranks) {
-                if (countRank(player, cards, rank) == 2) pairs.add(getIndex(rank, ranks));
+                if (countRank(player, cards, rank) == 2) pairs.add(getIndex(rank));
 
                 if (pairs.size() >= 2) {
                     int highest = pairs.get(0);
@@ -475,7 +473,7 @@ public class WinLogic {
                         tempPlayers.add(player);
                         return tempPlayers;
                     });
-                    playerPairs.computeIfAbsent(player, k -> { return pairs; });
+                    playerPairs.putIfAbsent(player, pairs);
 
                     winner = player;
                     bestHand = handTypes.highestTwoPair;
@@ -491,7 +489,7 @@ public class WinLogic {
         if (sameHandSize > 1) {
             if(kicker(cards, handValues.get(highestPairRank1), handValues, playerPairs)) {
                 /*
-                in kicker method the map "handvalues" is changed based on a condition
+                in kicker method the map "hand-values" is changed based on a condition
                 if condition changes (player list size), that means someone with a higher kicker wins
                  */
                 sameHand = null;
@@ -518,7 +516,7 @@ public class WinLogic {
                     if (playerHasCard(player, cards, suit, rank)) {
                         count++;
                         if (count >= 2) {
-                            pairRank = getIndex(rank, ranks);
+                            pairRank = getIndex(rank);
                             hasPair = true;
                         }
                     }
@@ -541,7 +539,7 @@ public class WinLogic {
                     return tempPlayers;
                 });
                 int highFinal = pairRank;
-                playerPairs.computeIfAbsent(player, k -> { return Collections.singletonList(highFinal); });
+                playerPairs.computeIfAbsent(player, k -> Collections.singletonList(highFinal));
 
                 winner = player;
                 bestHand = handTypes.highestPair;
@@ -573,14 +571,13 @@ public class WinLogic {
             int tempHighest = -1;
 
             for (Cards card : cards) {
-                int curr = getIndex(card.rank(), ranks);
+                int curr = getIndex(card.rank());
                 tempHighest = Math.max(curr, tempHighest);
             }
 
-            for (Cards card : player.hand) {
-                int curr = getIndex(card.rank(), ranks);
-                tempHighest = Math.max(curr, tempHighest);
-            }
+            int firstCardRank = getIndex(player.getHand().get(0).rank());
+            int secondCardRank = getIndex(player.getHand().get(1).rank());
+            tempHighest = Math.max(firstCardRank, secondCardRank);
 
             if (tempHighest == highestValue && tempHighest != -1) {
                 handValues.computeIfAbsent(tempHighest, k -> new ArrayList<>()).add(player);
@@ -600,7 +597,7 @@ public class WinLogic {
                 });
 
                 int highestFinal = tempHighest;
-                playerPairs.computeIfAbsent(player, k -> { return Collections.singletonList(highestFinal); });
+                playerPairs.computeIfAbsent(player, k -> Collections.singletonList(highestFinal));
 
                 winner = player;
                 bestHand = handTypes.highCard;

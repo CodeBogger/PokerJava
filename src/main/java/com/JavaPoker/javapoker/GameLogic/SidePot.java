@@ -1,10 +1,10 @@
-package com.example.javapoker;
+package com.JavaPoker.javapoker.GameLogic;
+
+import com.JavaPoker.javapoker.PlayerObject.Player;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.example.javapoker.PokerLogic.winner;
 
 public class SidePot {
     static boolean sidePostExist = false;
@@ -16,14 +16,14 @@ public class SidePot {
         sidePostExist = true;
     }
     public static void sidePotWinner(List<Player> players) {
-        int sidePotCurr = sidePots.get(winner);
-        winner.chips += sidePotCurr;
+        int sidePotCurr = sidePots.get(PokerLogic.winner);
+        PokerLogic.winner.addToChips(sidePotCurr);
         winnerSidePot = sidePotCurr;
-        players.remove(winner);
+        players.remove(PokerLogic.winner);
 
-        winner = WinLogic.winStart(players, PokerLogic.cardsList);
-        if(winner == null) {
+        PokerLogic.winner = WinLogic.winStart(players, PokerLogic.cardsList);
+        if(PokerLogic.winner == null) {
             SplitLogic.split(players, PokerLogic.pot);
-        } else { winner.chips += PokerLogic.pot - sidePotCurr; }
+        } else { PokerLogic.winner.addToChips(PokerLogic.pot - sidePotCurr); }
     }
 }

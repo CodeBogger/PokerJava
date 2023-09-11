@@ -1,14 +1,11 @@
-package com.example.javapoker;
+package com.JavaPoker.javapoker.CardsLogic;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Stack;
 
 public class Deck {
-    private static Stack<Cards> cards;
     public static Stack<Cards> initializeDeck() {
-        cards = new Stack<>();
+        Stack<Cards> cards = new Stack<>();
         String[] suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
         String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
 

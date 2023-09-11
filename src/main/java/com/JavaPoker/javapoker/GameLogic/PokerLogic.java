@@ -1,27 +1,33 @@
-package com.example.javapoker;
+package com.JavaPoker.javapoker.GameLogic;
+
+import com.JavaPoker.javapoker.PlayerObject.PlayerBot;
+import com.JavaPoker.javapoker.PlayerObject.PlayerUser;
+import com.JavaPoker.javapoker.CardsLogic.Cards;
+import com.JavaPoker.javapoker.CardsLogic.Deck;
+import com.JavaPoker.javapoker.PlayerObject.Player;
 
 import java.util.*;
 
-import static com.example.javapoker.Player.BlindType;
+import static com.JavaPoker.javapoker.PlayerObject.Player.BlindType;
 
 public class PokerLogic {
     static List<Cards> cardsList = new ArrayList<>();
     static List<Player> currentPlayers = new ArrayList<>(), sameHandCase = new ArrayList<>(), players = new ArrayList<>();
     static Player littleBlind, bigBlind, winner = null, user = null;
     static int pot;
-    static void gameStart() {
+    public static void gameStart() {
         addPlayers();
         setBlinds();
         Scanner scan = new Scanner(System.in);
 
-        while(!Menu.buttonClicked || winner != null) {
+        while(winner != null) {
             Stack<Cards> deck = Deck.initializeDeck();
             preFlopAndFlopHandling(deck, scan);
             turnRiverHandling(deck, scan, currentPlayers);
 
             sleep();
             if(setWinner() == -1) {
-                System.out.println("SAME HAND SIZE: "+WinLogic.sameHand.size());
+                System.out.println("SAME HAND SIZE: "+ WinLogic.sameHand.size());
                 sameHandCase = WinLogic.sameHand;
                 SplitLogic.split(sameHandCase, pot);
             }
@@ -30,7 +36,8 @@ public class PokerLogic {
             reset();
         }
     }
-
+    public static void removePlayer(Player player) { currentPlayers.remove(player); }
+    public static void addToPot(int amount) { pot += amount; }
     private static void sleep() {
         try {
             Thread.sleep(3000);
@@ -50,7 +57,7 @@ public class PokerLogic {
 
         System.out.println("\n\n "+winner.getName()+" IS THE WINNER! \n");
 
-        winner.chips += pot;
+        winner.addToChips(pot);
         System.out.println("PLAYERS IN LIST: "+currentPlayers.size());
 
         for(Player player : currentPlayers) {
@@ -66,7 +73,7 @@ public class PokerLogic {
         System.out.println("---- The River ----");
 
         System.out.println("\n---- Player's Hand ----");
-        for(Cards card : winner.hand) System.out.println(card.rank()+" of "+card.suit());
+        for(Cards card : winner.getHand()) System.out.println(card.rank()+" of "+card.suit());
         System.out.println("---- Player's Hand ----\n\n");
         return 0;
     }
@@ -101,11 +108,11 @@ public class PokerLogic {
         giveHands(deck, currentPlayers);
         checkBlinds();
 
-        if(!user.folded) getUserHand();
+        if(!user.isFolded()) getUserHand();
         TurnLogic.preFlopChoices(currentPlayers, scan, (currentPlayers.indexOf(littleBlind) + 2) % players.size());
         flop(deck);
 
-        if(!user.folded) getUserHand();
+        if(!user.isFolded()) getUserHand();
         TurnLogic.turns(currentPlayers, scan);
     }
     public static void gamePlayers() {
@@ -162,7 +169,7 @@ public class PokerLogic {
         int last = cardsList.size() - 1;
         System.out.println("The turn is: " + cardsList.get(last).rank() + " of " + cardsList.get(last).suit());
 
-        if(!user.folded) getUserHand();
+        if(!user.isFolded()) getUserHand();
         TurnLogic.turns(currentPlayers, scan);
 
     }
@@ -171,7 +178,7 @@ public class PokerLogic {
         int last = cardsList.size() - 1;
         System.out.println("The river is: " + cardsList.get(last).rank() + " of " + cardsList.get(last).suit());
 
-        if(!user.folded) getUserHand();
+        if(!user.isFolded()) getUserHand();
         TurnLogic.turns(currentPlayers, scan);
     }
 }
