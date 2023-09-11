@@ -7,25 +7,23 @@ import java.util.Map;
 import static com.example.javapoker.PokerLogic.winner;
 
 public class SidePot {
-    static int sidePot = 0;
     static boolean sidePostExist = false;
+    static int winnerSidePot = 0;
     static Map<Player, Integer> sidePots = new HashMap<>();
 
-    public static void addToSidePot(Player player, int sidePot) {
-        sidePots.computeIfAbsent(player, key -> { return sidePot; });
+    public static void addToSidePot(Player player) {
+        sidePots.computeIfAbsent(player, key -> { return PokerLogic.pot; });
         sidePostExist = true;
     }
-    public static void startSidePot(List<Player> players) {
-        winner.chips += sidePots.get(winner);
+    public static void sidePotWinner(List<Player> players) {
+        int sidePotCurr = sidePots.get(winner);
+        winner.chips += sidePotCurr;
+        winnerSidePot = sidePotCurr;
         players.remove(winner);
 
-        if(sidePots.size() > 1) {
-            for (Map.Entry<Player, Integer> entry : sidePots.entrySet()) {
-                if (entry.getKey() == winner) continue;
-                players.remove(entry.getKey());
-            }
-        }
         winner = WinLogic.winStart(players, PokerLogic.cardsList);
-        if(winner == null) SplitLogic.split(players, PokerLogic.pot);
+        if(winner == null) {
+            SplitLogic.split(players, PokerLogic.pot);
+        } else { winner.chips += PokerLogic.pot - sidePotCurr; }
     }
 }

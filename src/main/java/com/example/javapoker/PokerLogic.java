@@ -45,7 +45,7 @@ public class PokerLogic {
     }
     private static int setWinner() {
         winner = WinLogic.winStart(currentPlayers, cardsList);
-        if(SidePot.sidePots.containsKey(winner)) SidePot.startSidePot(currentPlayers);
+        if(SidePot.sidePots.containsKey(winner)) SidePot.sidePotWinner(currentPlayers);
         if(winner == null) return -1;
 
         System.out.println("\n\n "+winner.getName()+" IS THE WINNER! \n");
@@ -95,7 +95,6 @@ public class PokerLogic {
         changeBlinds();
         winner = null;
         pot = 0;
-        SidePot.sidePot = 0;
     }
     public static void preFlopAndFlopHandling(Stack<Cards> deck, Scanner scan) {
         gamePlayers();

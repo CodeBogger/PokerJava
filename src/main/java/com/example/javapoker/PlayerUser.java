@@ -57,7 +57,7 @@ public class PlayerUser extends Player {
             }
         };
 
-        if(choice == TurnLogic.CHOICE.ALLIN) SidePot.addToSidePot(user, user.chips);
+        if(choice == TurnLogic.CHOICE.ALLIN) SidePot.addToSidePot(user);
         System.out.println("Your choice: " + userInput + "\n\n");
         return choice;
     }

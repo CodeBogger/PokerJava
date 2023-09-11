@@ -15,7 +15,7 @@ public class PlayerBot extends Player {
         TurnLogic.CHOICE[] choices = {TurnLogic.CHOICE.ALLIN, TurnLogic.CHOICE.FOLD};
         TurnLogic.CHOICE res = choices[rand.nextInt(choices.length)];
 
-        if(res == TurnLogic.CHOICE.ALLIN) SidePot.addToSidePot(bot, allInAmount);
+        if(res == TurnLogic.CHOICE.ALLIN) SidePot.addToSidePot(bot);
         return res;
     }
     public static TurnLogic.CHOICE preFlopTurn(Player player) {
