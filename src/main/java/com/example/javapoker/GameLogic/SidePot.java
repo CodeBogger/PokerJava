@@ -1,6 +1,6 @@
-package com.JavaPoker.javapoker.GameLogic;
+package com.example.javapoker.GameLogic;
 
-import com.JavaPoker.javapoker.PlayerObject.Player;
+import com.example.javapoker.PlayerObject.Player;
 
 import java.util.HashMap;
 import java.util.List;

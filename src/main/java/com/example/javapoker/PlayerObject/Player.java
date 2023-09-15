@@ -1,7 +1,8 @@
-package com.JavaPoker.javapoker.PlayerObject;
+package com.example.javapoker.PlayerObject;
 
-import com.JavaPoker.javapoker.CardsLogic.Cards;
-import com.JavaPoker.javapoker.GameLogic.PokerLogic;
+import com.example.javapoker.CardsLogic.Cards;
+import com.example.javapoker.GameLogic.PokerLogic;
+import com.example.javapoker.Graphics.OutputSystem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ public class Player {
     }
     boolean allIn = false, inPreFlop = true;
     int chips, blindCallAmount = 0, totalBetAmount = 0;
-    boolean folded, calledBB = false, calledLB = false;
+    boolean folded;
     String name;
     BlindType blindType;
     List<Cards> hand;
@@ -24,13 +25,12 @@ public class Player {
         this.chips = chipCount;
         this.name = playerName;
         this.hand = new ArrayList<>();
-
     }
     public boolean isAllIn() { return this.allIn; }
-    public void hand() { for(Cards card : hand) System.out.println(card.rank()+" of "+card.suit()); }
+    public void hand() { for(Cards card : hand) OutputSystem.print(card.rank()+" of "+card.suit()); }
 
     public void AllIn() {
-        System.out.println(this.getName()+" went all in!");
+        OutputSystem.print(this.getName()+" went all in!");
         this.allIn = true;
         totalBetAmount += this.chips;
         PokerLogic.addToPot(this.chips);
@@ -54,7 +54,7 @@ public class Player {
     public void fold(Player player) {
         this.folded = true;
         PokerLogic.removePlayer(player);
-        System.out.println(player.getName()+" decided to fold!");
+        OutputSystem.print(player.getName()+" decided to fold!");
     }
     public void addHand(Cards card) {
         this.hand.add(card);
@@ -63,11 +63,11 @@ public class Player {
         if(this.blindType != null) {
 
             if(this.blindType == BlindType.BIGBLIND) {
-                System.out.println(this.name+" is the big blind. 30 tokens are automatically deducted from balance.");
+                OutputSystem.print(this.name+" is the big blind. 30 tokens are automatically deducted from balance.");
                 this.chips -= 30;
 
             } else {
-                System.out.println(this.name+" is the small blind. 15 tokens are automatically deducted from balance.");
+                OutputSystem.print(this.name+" is the small blind. 15 tokens are automatically deducted from balance.");
                 this.chips -= 15;
 
             }

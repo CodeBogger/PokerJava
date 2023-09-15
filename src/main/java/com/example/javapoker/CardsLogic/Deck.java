@@ -1,4 +1,4 @@
-package com.JavaPoker.javapoker.CardsLogic;
+package com.example.javapoker.CardsLogic;
 
 import java.util.Collections;
 import java.util.Stack;

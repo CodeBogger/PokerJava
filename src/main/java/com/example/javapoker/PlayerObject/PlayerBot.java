@@ -1,7 +1,7 @@
-package com.JavaPoker.javapoker.PlayerObject;
+package com.example.javapoker.PlayerObject;
 
-import com.JavaPoker.javapoker.GameLogic.TurnLogic;
-import com.JavaPoker.javapoker.GameLogic.SidePot;
+import com.example.javapoker.GameLogic.TurnLogic;
+import com.example.javapoker.GameLogic.SidePot;
 
 import java.util.Random;
 

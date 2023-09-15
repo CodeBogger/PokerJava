@@ -1,4 +1,4 @@
-package com.JavaPoker.javapoker.Graphics;
+package com.example.javapoker.Graphics;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -15,9 +15,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("/GUI.fxml"));
-            primaryStage.setScene(new Scene(loader.load(), 400, 400));
+            primaryStage.setScene(new Scene(loader.load(), 800, 800));
             primaryStage.setTitle("Poker");
             primaryStage.show();
         }

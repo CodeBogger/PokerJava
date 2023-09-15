@@ -1,8 +1,9 @@
-package com.JavaPoker.javapoker.GameLogic;
+package com.example.javapoker.GameLogic;
 
-import com.JavaPoker.javapoker.PlayerObject.Player;
-import com.JavaPoker.javapoker.PlayerObject.PlayerBot;
-import com.JavaPoker.javapoker.PlayerObject.PlayerUser;
+import com.example.javapoker.Graphics.OutputSystem;
+import com.example.javapoker.PlayerObject.Player;
+import com.example.javapoker.PlayerObject.PlayerBot;
+import com.example.javapoker.PlayerObject.PlayerUser;
 
 import java.util.*;
 public class TurnLogic {
@@ -21,14 +22,14 @@ public class TurnLogic {
             int index = (startIndex + i) % players.size();
 
             Player player = players.get(index);
-            System.out.println("CURRENT PLAYER: "+player.getName());
+            OutputSystem.print("CURRENT PLAYER: "+player.getName());
             TurnLogic.CHOICE choice;
 
             choice = player instanceof PlayerUser ? PlayerUser.preFlopTurn(scan, player) : PlayerBot.preFlopTurn(player);
 
             if (choice == CHOICE.RAISE) {
                 int raise = player instanceof PlayerUser ? PlayerUser.raiseTo(scan, player) : PlayerBot.raiseTo();
-                System.out.println("\n\n" + player.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
+                OutputSystem.print("\n\n" + player.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
 
                 player.addToBet(raise);
                 raiseAround(player, players, raise, scan);
@@ -36,14 +37,14 @@ public class TurnLogic {
 
             } else if (choice == CHOICE.FOLD) {
                 player.fold(player);
-                System.out.println("PLAYER COUNT: "+players.size());
+                OutputSystem.print("PLAYER COUNT: "+players.size());
 
             } else if (choice == CHOICE.CALL) {
                 int callAmount = player.getBlindType() == Player.BlindType.SMALLBLIND ? 15 : 30;
                 player.call(0);
 
                 player.addToBet(callAmount);
-                System.out.println(player.getName() + " decides to call. " + callAmount + " chips have been deducted from their amount.");
+                OutputSystem.print(player.getName() + " decides to call. " + callAmount + " chips have been deducted from their amount.");
             } else if (choice == CHOICE.ALLIN) {
                 int allInCall = player.getChips();
                 player.AllIn();
@@ -72,18 +73,18 @@ public class TurnLogic {
                     PokerLogic.pot += raise;
                     current.addToBet(raise);
 
-                    System.out.println("\n\n" + current.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
+                    OutputSystem.print("\n\n" + current.getName() + " DECIDES TO RAISE. AMOUNT TO RAISE: " + raise);
                     raiseAround(current, players, raise, scan);
                     return;
                 }
-                case CHECK -> System.out.println("\n\n" + current.getName() + " DECIDES TO CHECK");
+                case CHECK -> OutputSystem.print("\n\n" + current.getName() + " DECIDES TO CHECK");
                 case FOLD -> {
                     i--;
                     current.fold(current);
-                    System.out.println("Remaining players:");
-                    System.out.println("COUNT: "+players.size());
+                    OutputSystem.print("Remaining players:");
+                    OutputSystem.print("COUNT: "+players.size());
                     for (Player player : players) {
-                        System.out.println(player.getName());
+                        OutputSystem.print(player.getName());
                     }
                 }
                 case ALLIN -> {
@@ -113,7 +114,7 @@ public class TurnLogic {
                 case CALL -> {
                     currentPlayer.addToBet(totalRaise);
                     currentPlayer.call(totalRaise);
-                    System.out.println(currentPlayer.getName()+" decides to call "+totalRaise);
+                    OutputSystem.print(currentPlayer.getName()+" decides to call "+totalRaise);
                 }
                 case ALLIN -> {
                     int allInAmount = currentPlayer.getChips();
@@ -132,7 +133,7 @@ public class TurnLogic {
                         currentPlayer.call(totalRaise + (30 - currentPlayer.getBlindCallAmount()));
                     }
                     currentPlayer.addToBet(newRaise);
-                    System.out.println(currentPlayer.getName() + " decides to re-raise. New raise amount: " + totalRaise);
+                    OutputSystem.print(currentPlayer.getName() + " decides to re-raise. New raise amount: " + totalRaise);
                     raiseAround(currentPlayer, players, totalRaise, scan);
                     return;
                 }

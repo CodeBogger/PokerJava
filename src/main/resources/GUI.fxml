@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.JavaPoker.javapoker.Graphics.HelloController">
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="400.0" spacing="30.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/20.0.1" fx:controller="com.example.javapoker.Graphics.HelloController">
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!"/>
+    <Label fx:id="welcomeText" text="Poker In Java! Created by Bogdan">
+      <font>
+         <Font name="Impact" size="21.0" />
+      </font></Label>
+    <Button fx:id="playButton" prefHeight="54.0" prefWidth="129.0" text="Play!" onAction="#switchScene">
+        <font>
+            <Font name="System Bold Italic" size="22.0" />
+        </font>
+    </Button>
 </VBox>

@@ -1,7 +1,8 @@
-package com.JavaPoker.javapoker.GameLogic;
+package com.example.javapoker.GameLogic;
 
-import com.JavaPoker.javapoker.CardsLogic.Cards;
-import com.JavaPoker.javapoker.PlayerObject.Player;
+import com.example.javapoker.CardsLogic.Cards;
+import com.example.javapoker.Graphics.OutputSystem;
+import com.example.javapoker.PlayerObject.Player;
 
 import java.util.*;
 
@@ -20,7 +21,7 @@ public class WinLogic {
 
         getHandValues(remainingPlayers, cards); //get hand values in ascending order to prioritize higher hands with higher value
         //get highest hand
-        System.out.println("WINNERS HAND: " + bestHand.toString().toUpperCase());
+        OutputSystem.print("WINNERS HAND: " + bestHand.toString().toUpperCase());
         return winner;
     }
     private static void getHandValues(List<Player> remainingPlayers, List<Cards> cards) {

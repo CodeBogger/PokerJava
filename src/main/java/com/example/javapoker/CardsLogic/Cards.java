@@ -1,4 +1,4 @@
-package com.JavaPoker.javapoker.CardsLogic;
+package com.example.javapoker.CardsLogic;
 
 
 public record Cards(String suit, String rank) {

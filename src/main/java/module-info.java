@@ -11,13 +11,14 @@ module com.JavaPoker.javapoker {
 
     requires com.almasb.fxgl.all;
     requires java.desktop;
+    requires annotations;
 
-    exports com.JavaPoker.javapoker.CardsLogic;
-    opens com.JavaPoker.javapoker.CardsLogic to javafx.fxml;
-    exports com.JavaPoker.javapoker.Graphics;
-    opens com.JavaPoker.javapoker.Graphics to javafx.fxml;
-    exports com.JavaPoker.javapoker.PlayerObject;
-    opens com.JavaPoker.javapoker.PlayerObject to javafx.fxml;
-    exports com.JavaPoker.javapoker.GameLogic;
-    opens com.JavaPoker.javapoker.GameLogic to javafx.fxml;
+    exports com.example.javapoker.CardsLogic;
+    opens com.example.javapoker.CardsLogic to javafx.fxml;
+    exports com.example.javapoker.Graphics;
+    opens com.example.javapoker.Graphics to javafx.fxml;
+    exports com.example.javapoker.PlayerObject;
+    opens com.example.javapoker.PlayerObject to javafx.fxml;
+    exports com.example.javapoker.GameLogic;
+    opens com.example.javapoker.GameLogic to javafx.fxml;
 }
