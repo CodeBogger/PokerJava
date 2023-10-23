@@ -1,7 +1,6 @@
 package com.example.javapoker.GameLogic;
 
 import com.example.javapoker.CardsLogic.Cards;
-import com.example.javapoker.Graphics.OutputSystem;
 import com.example.javapoker.PlayerObject.Player;
 
 import java.util.*;
@@ -21,7 +20,7 @@ public class WinLogic {
 
         getHandValues(remainingPlayers, cards); //get hand values in ascending order to prioritize higher hands with higher value
         //get highest hand
-        OutputSystem.print("WINNERS HAND: " + bestHand.toString().toUpperCase());
+        // ScreenText.printToScreen("WINNERS HAND: " + bestHand.toString().toUpperCase());
         return winner;
     }
     private static void getHandValues(List<Player> remainingPlayers, List<Cards> cards) {
@@ -50,56 +49,68 @@ public class WinLogic {
                 cards.stream().anyMatch(card -> card.suit().equals(suit) && card.rank().equals(rank));
     }
     private static boolean kicker(List<Cards> cards, List<Player> players, Map<Integer, List<Player>> map, Map<Player, List<Integer>> pairs) {
-         int highestInDraw = -1;
-         List<Integer> highestHand = new ArrayList<>(); //add integer and get highest, corresponding to players
-         for(Cards card : cards) highestInDraw = Math.max(highestInDraw, getIndex(card.rank()));
 
-         for (Player player : players) {
-             int currMax = -1;
-             List<Integer> playerPairs = pairs.getOrDefault(player, new ArrayList<>());
+        // To store the highest rank found among the cards in 'cards'.
+        int highestInDraw = -1;
 
-             for (Cards card : player.getHand()) {
-                 int pair = getIndex(card.rank());
-                 if(playerPairs.contains(pair)) continue;
-                 currMax = Math.max(currMax, getIndex(card.rank()));
-             }
-             highestHand.add(currMax);
-         }
-         //check if players have same kicker card
-         int max = -1;
-         List<Integer> maxKickerIndexes = new ArrayList<>();
-         for(int value : highestHand) {
-             if(value == max) {
-                 maxKickerIndexes.add(highestHand.indexOf(value));
-             } else if(value > max) {
-                 maxKickerIndexes.clear();
-                 maxKickerIndexes.add(highestHand.indexOf(value));
-             }
-         }
+        // A list to store the highest rank of each player.
+        List<Integer> highestHand = new ArrayList<>();
 
-         if(maxKickerIndexes.size() != 1) {
-             map.clear();
-             map.computeIfAbsent(max, key -> {
-                 List<Player> playerList = new ArrayList<>();
-                 for(int index : maxKickerIndexes) playerList.add(players.get(maxKickerIndexes.get(index)));
-                 return playerList;
-             });
-             return true;
-         }
+        // Find the highest rank among the 'cards'.
+        for(Cards card : cards) highestInDraw = Math.max(highestInDraw, getIndex(card.rank()));
 
-         if(highestInDraw >= Collections.max(highestHand)) return false; //if card in deck is less or equal to any in all player's hand then return as split
+        // Iterate over each player and determine the highest rank in their hand.
+        for (Player player : players) {
+            int currMax = -1;
+            List<Integer> playerPairs = pairs.getOrDefault(player, new ArrayList<>());
 
-         map.clear(); //if prev condition fails it means someone has a higher card than any in draw, clear hashmap to return winning player (everyone here has equal hand value in terms of pairs)
-         int indexMax = highestHand.indexOf(Collections.max(highestHand)); //get index of max integer in array... each number corresponds to player in (players) list
-         Player winningHand = players.get(indexMax); //get winning hand by getting index of max integer
+            // For each card in the player's hand, update the currMax to the highest rank.
+            for (Cards card : player.getHand()) {
+                int pair = getIndex(card.rank());
+                if(playerPairs.contains(pair)) continue;
+                currMax = Math.max(currMax, getIndex(card.rank()));
+            }
+            highestHand.add(currMax); // Add the highest rank of the current player to 'highestHand'.
+        }
 
-         winner = winningHand;
-         map.computeIfAbsent(Collections.max(highestHand), key -> {
+        // Determine the players having the highest kicker card.
+        int max = -1;
+        List<Integer> maxKickerIndexes = new ArrayList<>();
+        for(int value : highestHand) {
+            if(value == max) {
+                maxKickerIndexes.add(highestHand.indexOf(value));
+            } else if(value > max) {
+                maxKickerIndexes.clear();
+                maxKickerIndexes.add(highestHand.indexOf(value));
+            }
+        }
+
+        // If there's a tie based on the kicker card.
+        if(maxKickerIndexes.size() != 1) {
+            map.clear();
+            map.computeIfAbsent(max, key -> {
+                List<Player> playerList = new ArrayList<>();
+                for(int index : maxKickerIndexes) playerList.add(players.get(maxKickerIndexes.get(index)));
+                return playerList;
+            });
+            return true;
+        }
+
+        // If the highest card in the deck is greater or equal to any player's highest card, then it's a split.
+        if(highestInDraw >= Collections.max(highestHand)) return false;
+
+        // If the above condition fails, then there's a clear winner.
+        map.clear();
+        int indexMax = highestHand.indexOf(Collections.max(highestHand)); // Get the index of the player with the highest rank card.
+        Player winningHand = players.get(indexMax); // Get the player corresponding to that index.
+
+        winner = winningHand; // Assign the winning player.
+        map.computeIfAbsent(Collections.max(highestHand), key -> {
             List<Player> playerList = new ArrayList<>();
             playerList.add(winningHand);
             return playerList;
         });
-         return true;
+        return true;
     }
     private static boolean hasNumber(Player player, List<Cards> cards, String rank) {
         return player.getHand().stream().anyMatch(card -> card.rank().equals(rank)) || cards.stream().anyMatch(card -> card.rank().equals(rank));

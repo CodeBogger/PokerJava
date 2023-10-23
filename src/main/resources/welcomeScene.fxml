@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="400" prefHeight="400" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.javapoker.Graphics.WelcomeController">
+    <Label text="Welcome" fx:id="welcomeLabel" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    <Button text="Start Game" onAction="#startGame" fx:id="startGameButton" style="-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 16px; -fx-border-radius: 5px; -fx-cursor: hand;"/>
+</VBox>
