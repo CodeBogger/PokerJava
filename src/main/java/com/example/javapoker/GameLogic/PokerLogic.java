@@ -1,5 +1,6 @@
 package com.example.javapoker.GameLogic;
 
+import com.example.javapoker.Graphics.GameController;
 import com.example.javapoker.PlayerObject.PlayerBot;
 import com.example.javapoker.PlayerObject.PlayerUser;
 import com.example.javapoker.CardsLogic.Cards;
@@ -19,7 +20,7 @@ public class PokerLogic {
         addPlayers();
         setBlinds();
         Scanner scan = new Scanner(System.in);
-        // OutputSystem.print("GAME STARTED");
+        // GameController.printToOutput("GAME STARTED");
 
         while(winner != null) {
             // OutputSystem.print("GAME IN LOOP");
